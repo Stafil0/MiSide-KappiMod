@@ -1,7 +1,6 @@
 using HarmonyLib;
 using KappiMod.Logging;
 using KappiMod.Mods;
-using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
 #if ML
 using Il2Cpp;
@@ -12,34 +11,12 @@ using BepInEx.IL2CPP;
 namespace KappiMod.Patches.Rng;
 
 [HarmonyPatch]
-internal sealed class PCGamesPatch : IPatch
+internal sealed class PCGamesPatch : ScopedRandomPatch
 {
-    public string Id => "com.kappimod.pcgames";
-    public string Name => "PC Games Patch";
-    public string Description =>
-        "Real-world PC mandatory sequence, solved: files + sliders";
-
-    private readonly HarmonyLib.Harmony _harmony;
-
-    public PCGamesPatch()
-    {
-        _harmony = new(Id);
-        _harmony.PatchAll(typeof(PCGamesPatch));
-    }
-
-    public void Dispose()
-    {
-        _harmony.UnpatchSelf();
-    }
-
-    private static bool DisableRandom()
-    {
-        var previous = DeterministicRandomPatch.DisabledRandom;
-        DeterministicRandomPatch.DisabledRandom = true;
-        return previous;
-    }
-
-    private static void RestoreRandom(bool previous) => DeterministicRandomPatch.DisabledRandom = previous;
+    public override string Id => "com.kappimod.pcgames";
+    public override string Name => "PC Games Patch";
+    public override string Description =>
+        "The Real World PC mandatory sequence: files + sliders";
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location14_PCGames), nameof(Location14_PCGames.OpenFilesGame))]

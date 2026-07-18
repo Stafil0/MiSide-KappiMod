@@ -1,7 +1,6 @@
 using HarmonyLib;
 using KappiMod.Logging;
 using KappiMod.Mods;
-using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
 #if ML
 using Il2Cpp;
@@ -12,35 +11,12 @@ using BepInEx.IL2CPP;
 namespace KappiMod.Patches.Rng;
 
 [HarmonyPatch]
-internal sealed class PlayerIdPatch : IPatch
+internal sealed class PlayerIdPatch : ScopedRandomPatch
 {
-    public string Id => "com.kappimod.playerid";
-    public string Name => "Player ID Patch";
-    public string Description =>
+    public override string Id => "com.kappimod.playerid";
+    public override string Name => "Player ID Patch";
+    public override string Description =>
         "Fixed last chapter monitor ID";
-
-    private readonly HarmonyLib.Harmony _harmony;
-
-    public PlayerIdPatch()
-    {
-        _harmony = new(Id);
-        _harmony.PatchAll(typeof(PlayerIdPatch));
-    }
-
-    public void Dispose()
-    {
-        _harmony.UnpatchSelf();
-    }
-
-    private static bool DisableRandom()
-    {
-        var previous = DeterministicRandomPatch.DisabledRandom;
-        DeterministicRandomPatch.DisabledRandom = true;
-        return previous;
-    }
-
-    private static void RestoreRandom(bool previous) =>
-        DeterministicRandomPatch.DisabledRandom = previous;
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location15_ScreenID), "Start")]
