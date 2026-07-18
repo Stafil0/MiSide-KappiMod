@@ -11,8 +11,13 @@ using BepInEx.IL2CPP;
 
 namespace KappiMod.Patches.Rng;
 
-internal sealed partial class MilaMinigamesPatch
+[HarmonyPatch]
+internal sealed class MilaMinigame4Patch : ScopedRandomPatch
 {
+    public override string Id => "com.kappimod.milaminigame4";
+    public override string Name => "Mila Minigame 4 Patch";
+    public override string Description => "Mila invaders minigame: walls in one line at sides";
+
     private const float WallXMax = 0.4f;
 
     [HarmonyPrefix]

@@ -11,8 +11,13 @@ using BepInEx.IL2CPP;
 
 namespace KappiMod.Patches.Rng;
 
-internal sealed partial class MilaMinigamesPatch
+[HarmonyPatch]
+internal sealed class MilaMinigame2Patch : ScopedRandomPatch
 {
+    public override string Id => "com.kappimod.milaminigame2";
+    public override string Name => "Mila Minigame 2 Patch";
+    public override string Description => "Mila towers minigame: zigzag pattern";
+
     private const float MinCatchRadius = 0.25f;
     private const float MinStepMult = 0.7f;
     private const float MinDirZ = 0.05f;
@@ -94,7 +99,7 @@ internal sealed partial class MilaMinigamesPatch
         }
 
         var last = points[points.Count - 1]?.point;
-        var endToEnd =last != null
+        var endToEnd = last != null
             ? Vector3.Distance(anchor.transform.position, last.transform.position)
             : 0f;
 

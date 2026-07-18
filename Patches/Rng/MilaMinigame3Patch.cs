@@ -10,8 +10,13 @@ using BepInEx.IL2CPP;
 
 namespace KappiMod.Patches.Rng;
 
-internal sealed partial class MilaMinigamesPatch
+[HarmonyPatch]
+internal sealed class MilaMinigame3Patch : ScopedRandomPatch
 {
+    public override string Id => "com.kappimod.milaminigame3";
+    public override string Name => "Mila Minigame 3 Patch";
+    public override string Description => "Mila figures minigame: solved board";
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location19_Game3), "Start")]
     private static void BeforeGame3Start(out bool __state) => __state = DisableRandom();

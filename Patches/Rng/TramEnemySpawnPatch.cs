@@ -1,7 +1,6 @@
 using HarmonyLib;
 using KappiMod.Logging;
 using KappiMod.Mods;
-using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
 #if ML
 using Il2Cpp;
@@ -12,33 +11,11 @@ using BepInEx.IL2CPP;
 namespace KappiMod.Patches.Rng;
 
 [HarmonyPatch]
-internal sealed class TramEnemySpawnPatch : IPatch
+internal sealed class TramEnemySpawnPatch : ScopedRandomPatch
 {
-    public string Id => "com.kappimod.tramenemyspawn";
-    public string Name => "Tram Enemy Spawn Patch";
-    public string Description => "Tram: fixed enemy spawn offsets";
-
-    private readonly HarmonyLib.Harmony _harmony;
-
-    public TramEnemySpawnPatch()
-    {
-        _harmony = new(Id);
-        _harmony.PatchAll(typeof(TramEnemySpawnPatch));
-    }
-
-    public void Dispose()
-    {
-        _harmony.UnpatchSelf();
-    }
-
-    private static bool DisableRandom()
-    {
-        var previous = DeterministicRandomPatch.DisabledRandom;
-        DeterministicRandomPatch.DisabledRandom = true;
-        return previous;
-    }
-
-    private static void RestoreRandom(bool previous) => DeterministicRandomPatch.DisabledRandom = previous;
+    public override string Id => "com.kappimod.tramenemyspawn";
+    public override string Name => "Tram Enemy Spawn Patch";
+    public override string Description => "Tram enemies: fixed spawn offsets";
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location11_Lift), "CreateEnemy")]

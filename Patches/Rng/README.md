@@ -6,9 +6,10 @@ List of mod patches here. If you found an error, or you have some suggestions, y
 
 ## Rng Patches
 
-1. [DeterministicRandomPatch](./DeterministicRandomPatch.cs)
+1. [DeterministicRandomPatch](./DeterministicRandomPatch.cs) (+ [ScopedRandomPatch](./ScopedRandomPatch.cs))
 
    Makes random rolls in the game repeatable / forceable so other patches can remove RNG.
+   `ScopedRandomPatch` is the base for patches that scope `DisabledRandom` around game methods.
 
 2. [ChibiDoorUnlockerPatch](./ChibiDoorUnlockerPatch.cs)
 
@@ -34,9 +35,9 @@ List of mod patches here. If you found an error, or you have some suggestions, y
 
    Auto-matches the loop chapter clocks so you don't have to dial them.
 
-8. [MilaMinigamesPatch](./MilaMinigamesPatch.cs) (+ [Game1](./MilaMinigamesPatch.Game1.cs), [Game2](./MilaMinigamesPatch.Game2.cs), [Game3](./MilaMinigamesPatch.Game3.cs), [Game4](./MilaMinigamesPatch.Game4.cs))
+8. [MilaMinigame1Patch](./MilaMinigame1Patch.cs), [MilaMinigame2Patch](./MilaMinigame2Patch.cs), [MilaMinigame3Patch](./MilaMinigame3Patch.cs), [MilaMinigame4Patch](./MilaMinigame4Patch.cs)
 
-   Pre-solves Mila's 4 minigames (laser, tower, figures, home invaders).
+   Pre-solves Mila's 4 minigames (laser, towers, figures, home invaders).
 
 9. [RunCorridorPatch](./RunCorridorPatch.cs)
 
@@ -50,14 +51,18 @@ List of mod patches here. If you found an error, or you have some suggestions, y
 
     Makes tram enemies before Ghost Mita always spawn in the same easy spot.
 
-12. [PCGamesPatch](./PCGamesPatch.cs)
+12. [ErrorWindowsPatch](./ErrorWindowsPatch.cs)
+
+    Forces the Ghostly OK error window to always jump to the first position.
+
+13. [PCGamesPatch](./PCGamesPatch.cs)
 
     Real-world PC file-drag and tree-slider games are always already solved.
 
-13. [PlayerIdPatch](./PlayerIdPatch.cs)
+14. [PlayerIdPatch](./PlayerIdPatch.cs)
 
     Forces the player ID screen to always show `0000`.
 
-14. [MilaGrabPatch](./MilaGrabPatch.cs) — **not registered**
+15. [MilaGrabPatch](./MilaGrabPatch.cs) — **not registered**
 
     Broken Mita only grabs once; later grabs are blocked.

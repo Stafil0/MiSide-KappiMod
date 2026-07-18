@@ -8,8 +8,13 @@ using BepInEx.IL2CPP;
 
 namespace KappiMod.Patches.Rng;
 
-internal sealed partial class MilaMinigamesPatch
+[HarmonyPatch]
+internal sealed class MilaMinigame1Patch : ScopedRandomPatch
 {
+    public override string Id => "com.kappimod.milaminigame1";
+    public override string Name => "Mila Minigame 1 Patch";
+    public override string Description => "Mila laser minigame: fixed shot curve";
+
     private static readonly float[] ShotCurve = { -1f, +0.5f, -0.5f, +1f, -0.5f };
 
     [HarmonyPostfix]
