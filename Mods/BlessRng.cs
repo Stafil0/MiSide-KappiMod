@@ -9,7 +9,7 @@ namespace KappiMod.Mods;
 [ModInfo(
     name: "BlessRng Mod",
     description: "Removes RNG from the game",
-    version: "1.1.0",
+    version: "1.2.0",
     author: BuildInfo.COMPANY
 )]
 public sealed class BlessRng : BaseMod
@@ -39,10 +39,20 @@ public sealed class BlessRng : BaseMod
 
     private void RegisterPatches()
     {
+        _patchManager.RegisterPatch(new DeterministicRandomPatch(disabledRandom: false));
         _patchManager.RegisterPatch<ChibiDoorUnlockerPatch>();
         _patchManager.RegisterPatch<ChipMiniGamePatch>();
         _patchManager.RegisterPatch<FixedItemSpawnPatch>();
         _patchManager.RegisterPatch<PassableDummiesPatch>();
         _patchManager.RegisterPatch<RingInstantReadyPatch>();
+        _patchManager.RegisterPatch<LoopClockPatch>();
+        _patchManager.RegisterPatch<MilaMinigamesPatch>();
+        _patchManager.RegisterPatch<RunCorridorPatch>();
+        _patchManager.RegisterPatch<TramEnemySpawnPatch>();
+        _patchManager.RegisterPatch<PCGamesPatch>();
+        _patchManager.RegisterPatch<PlayerIdPatch>();
+
+        // Disabled for now, need to discuss with other speedrunners before introducing it
+        // _patchManager.RegisterPatch<MilaGrabPatch>();
     }
 }
