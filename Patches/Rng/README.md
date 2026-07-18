@@ -42,18 +42,22 @@ List of mod patches here. If you found an error, or you have some suggestions, y
 
    Forces the Run & Hide corridor to only straight paths — no turns or doors.
 
-10. [TramEnemySpawnPatch](./TramEnemySpawnPatch.cs)
+10. [ArenaBombPatch](./ArenaBombPatch.cs)
+
+    Fixes Run & Hide bomb timers: longest music-on / shortest music-off waits, and longest eyes-closed / shortest eyes-open windows.
+
+11. [TramEnemySpawnPatch](./TramEnemySpawnPatch.cs)
 
     Makes tram enemies before Ghost Mita always spawn in the same easy spot.
 
-11. [PCGamesPatch](./PCGamesPatch.cs)
+12. [PCGamesPatch](./PCGamesPatch.cs)
 
     Real-world PC file-drag and tree-slider games are always already solved.
 
-12. [PlayerIdPatch](./PlayerIdPatch.cs)
+13. [PlayerIdPatch](./PlayerIdPatch.cs)
 
     Forces the player ID screen to always show `0000`.
 
-13. [MilaGrabPatch](./MilaGrabPatch.cs) — **not registered**
+14. [MilaGrabPatch](./MilaGrabPatch.cs) — **not registered**
 
     Broken Mita only grabs once; later grabs are blocked.

@@ -48,6 +48,7 @@ public sealed class BlessRng : BaseMod
         _patchManager.RegisterPatch<LoopClockPatch>();
         _patchManager.RegisterPatch<MilaMinigamesPatch>();
         _patchManager.RegisterPatch<RunCorridorPatch>();
+        _patchManager.RegisterPatch<ArenaBombPatch>();
         _patchManager.RegisterPatch<TramEnemySpawnPatch>();
         _patchManager.RegisterPatch<PCGamesPatch>();
         _patchManager.RegisterPatch<PlayerIdPatch>();
