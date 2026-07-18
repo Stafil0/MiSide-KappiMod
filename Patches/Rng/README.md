@@ -6,24 +6,58 @@ List of mod patches here. If you found an error, or you have some suggestions, y
 
 ## Rng Patches
 
-1. [ChibiDoorUnlockerPatch](./ChibiDoorUnlockerPatch.cs)
+1. [DeterministicRandomPatch](./DeterministicRandomPatch.cs)
 
-   Unlocks the door without catching chibi guys. Just interact with the box that contains the chibis and the door will be unlocked.
+   Makes random rolls in the game repeatable / forceable so other patches can remove RNG.
 
-1. [ChipMiniGamePatch](./ChipMiniGamePatch.cs)
+2. [ChibiDoorUnlockerPatch](./ChibiDoorUnlockerPatch.cs)
+
+   Unlocks the chibi door by interacting with the box — no catching required.
+
+3. [ChipMiniGamePatch](./ChipMiniGamePatch.cs)
 
    Removes randomness from the chip mini-game by fixing start/end points.
 
-1. [FixedItemSpawnPatch](./FixedItemSpawnPatch.cs)
+4. [FixedItemSpawnPatch](./FixedItemSpawnPatch.cs)
 
-   Set fixed item spawn positions in Chapter 2 and Chapter 3.
+   Sets fixed item spawn positions in Chapter 2 and Chapter 3.
 
-1. [PassableDummiesPatch](./PassableDummiesPatch.cs)
+5. [PassableDummiesPatch](./PassableDummiesPatch.cs)
 
-   Makes all dummies passable. Just accept or decline all dummies, regardless of their characteristics, such as emotions or red eyes.
+   Makes all dummies passable regardless of emotions or red eyes.
 
-1. [RingInstantReadyPatch](./RingInstantReadyPatch.cs)
+6. [RingInstantReadyPatch](./RingInstantReadyPatch.cs)
 
    Skips the ring wait event and instantly makes the ring ready in Cappie chapter.
 
-   > I don't know if this is needed in the mod, but I left it.
+7. [LoopClockPatch](./LoopClockPatch.cs)
+
+   Auto-matches the loop chapter clocks so you don't have to dial them.
+
+8. [MilaMinigamesPatch](./MilaMinigamesPatch.cs) (+ [Game1](./MilaMinigamesPatch.Game1.cs), [Game2](./MilaMinigamesPatch.Game2.cs), [Game3](./MilaMinigamesPatch.Game3.cs), [Game4](./MilaMinigamesPatch.Game4.cs))
+
+   Pre-solves Mila's 4 minigames (laser, tower, figures, home invaders).
+
+9. [RunCorridorPatch](./RunCorridorPatch.cs)
+
+   Forces the Run & Hide corridor to only straight paths — no turns or doors.
+
+10. [ArenaBombPatch](./ArenaBombPatch.cs)
+
+    Fixes Run & Hide bomb timers: longest music-on / shortest music-off waits, and longest eyes-closed / shortest eyes-open windows.
+
+11. [TramEnemySpawnPatch](./TramEnemySpawnPatch.cs)
+
+    Makes tram enemies before Ghost Mita always spawn in the same easy spot.
+
+12. [PCGamesPatch](./PCGamesPatch.cs)
+
+    Real-world PC file-drag and tree-slider games are always already solved.
+
+13. [PlayerIdPatch](./PlayerIdPatch.cs)
+
+    Forces the player ID screen to always show `0000`.
+
+14. [MilaGrabPatch](./MilaGrabPatch.cs) — **not registered**
+
+    Broken Mita only grabs once; later grabs are blocked.
