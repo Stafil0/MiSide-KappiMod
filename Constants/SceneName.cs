@@ -10,4 +10,5 @@ public static class SceneName
     public const string BACKROOMS = "Scene 7 - Backrooms";
     public const string CHIBIMITA = "Scene 9 - ChibiMita";
     public const string ENDING_GAME = "Scene 16 - TheEnd";
+    public const string NOVELS = "Scene 18 - 2D";
 }
