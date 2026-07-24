@@ -108,20 +108,19 @@ public sealed class DialogueSkipper : BaseMod
             return;
         }
 
-        args.DialogueInstance.SkipDialogue();
+        args.Skip();
         LogDialogueInfo(args);
     }
 
     private bool IsDialogueIgnored(DialogueEventArgs args) =>
-        _ignoredDialogues.ContainsKey(args.SceneName)
-        && _ignoredDialogues[args.SceneName].ContainsKey(args.ObjectName)
-        && _ignoredDialogues[args.SceneName][args.ObjectName] == args.IndexString;
+        _ignoredDialogues.ContainsKey(args.SceneName) &&
+        _ignoredDialogues[args.SceneName].ContainsKey(args.ObjectName) &&
+        _ignoredDialogues[args.SceneName][args.ObjectName] == args.IndexString;
 
     private static void LogDialogueInfo(
         DialogueEventArgs args,
         char separator = '-',
-        bool isWarning = false
-    )
+        bool isWarning = false)
     {
         if (string.IsNullOrWhiteSpace(args.Text))
         {
