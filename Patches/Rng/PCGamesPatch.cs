@@ -16,7 +16,7 @@ internal sealed class PCGamesPatch : ScopedRandomPatch
     public override string Id => "com.kappimod.pcgames";
     public override string Name => "PC Games Patch";
     public override string Description =>
-        "The Real World PC mandatory sequence: files + sliders";
+        "The Real World PC mandatory sequence: files and sliders";
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location14_PCGames), nameof(Location14_PCGames.OpenFilesGame))]
@@ -28,9 +28,7 @@ internal sealed class PCGamesPatch : ScopedRandomPatch
     {
         RestoreRandom(__state);
 
-        const string MESSAGE = "PC files: solved";
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-        KappiLogger.Log(MESSAGE);
+        EventManager.ShowEvent(new($"{nameof(BlessRng)}: PC files puzzle solved"));
     }
 
     [HarmonyPrefix]
@@ -43,8 +41,6 @@ internal sealed class PCGamesPatch : ScopedRandomPatch
     {
         RestoreRandom(__state);
 
-        const string MESSAGE = "PC sliders: solved";
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-        KappiLogger.Log(MESSAGE);
+        EventManager.ShowEvent(new($"{nameof(BlessRng)}: PC slider puzzle solved"));
     }
 }

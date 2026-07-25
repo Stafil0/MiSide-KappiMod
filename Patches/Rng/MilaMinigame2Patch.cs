@@ -16,7 +16,7 @@ internal sealed class MilaMinigame2Patch : ScopedRandomPatch
 {
     public override string Id => "com.kappimod.milaminigame2";
     public override string Name => "Mila Minigame 2 Patch";
-    public override string Description => "Mila towers minigame: zigzag pattern";
+    public override string Description => "Mila towers mini-game: zigzag pattern";
 
     private const float MinCatchRadius = 0.25f;
     private const float MinStepMult = 0.7f;
@@ -38,9 +38,8 @@ internal sealed class MilaMinigame2Patch : ScopedRandomPatch
         try
         {
             ApplyGame2ZigzagLayout(__instance);
-            const string MESSAGE = "Mila Game 2: zigzag pattern";
-            EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-            KappiLogger.Log(MESSAGE);
+
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Mila Game 2: zigzag pattern applied"));
         }
         catch (Exception ex)
         {

@@ -16,7 +16,7 @@ internal sealed class PlayerIdPatch : ScopedRandomPatch
     public override string Id => "com.kappimod.playerid";
     public override string Name => "Player ID Patch";
     public override string Description =>
-        "Fixed last chapter monitor ID";
+        "Fixes the last chapter monitor ID";
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location15_ScreenID), "Start")]
@@ -28,8 +28,6 @@ internal sealed class PlayerIdPatch : ScopedRandomPatch
     {
         RestoreRandom(__state);
 
-        const string MESSAGE = "Player ID: (0000)";
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-        KappiLogger.Log(MESSAGE);
+        EventManager.ShowEvent(new($"{nameof(BlessRng)}: Player ID set to (0000)"));
     }
 }

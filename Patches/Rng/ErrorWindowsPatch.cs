@@ -17,7 +17,7 @@ internal sealed class ErrorWindowsPatch : IPatch
 {
     public string Id => "com.kappimod.errorwindows";
     public string Name => "Error Windows Patch";
-    public string Description => "Error windows always stay in the first slot";
+    public string Description => "Keeps the error windows in the first slot";
 
     private static readonly Vector3 _firstPosition = new(-6.692f, 1.341f, -1.094f);
 
@@ -38,18 +38,25 @@ internal sealed class ErrorWindowsPatch : IPatch
     [HarmonyPatch(typeof(Location11_ErrorWindows), nameof(Location11_ErrorWindows.Play))]
     private static void AfterPlay(Location11_ErrorWindows __instance)
     {
-        __instance.errorWindowClone.transform.localPosition = _firstPosition;
-        __instance.errorWindowOKPosition.transform.localPosition = _firstPosition;
-        __instance.errorWindowReady.transform.localPosition = _firstPosition;
-
-        __instance.positions = new(new Vector3[15]);
-        for (int i = 0; i < __instance.positions.Length; ++i)
+        try
         {
-            __instance.positions[i] = _firstPosition;
-        }
+            __instance.errorWindowClone.transform.localPosition = _firstPosition;
+            __instance.errorWindowOKPosition.transform.localPosition = _firstPosition;
+            __instance.errorWindowReady.transform.localPosition = _firstPosition;
 
-        const string MESSAGE = "Ghostly: error windows stay in the first slot";
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-        KappiLogger.Log(MESSAGE);
+            __instance.positions = new(new Vector3[15]);
+            for (int i = 0; i < __instance.positions.Length; ++i)
+            {
+                __instance.positions[i] = _firstPosition;
+            }
+
+            EventManager.ShowEvent(
+                new($"{nameof(BlessRng)}: Ghostly: error windows remain in the first slot")
+            );
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to set positions", exception: ex);
+        }
     }
 }

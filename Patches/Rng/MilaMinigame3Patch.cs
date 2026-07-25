@@ -15,7 +15,7 @@ internal sealed class MilaMinigame3Patch : ScopedRandomPatch
 {
     public override string Id => "com.kappimod.milaminigame3";
     public override string Name => "Mila Minigame 3 Patch";
-    public override string Description => "Mila figures minigame: solved board";
+    public override string Description => "Mila figures mini-game: solved board";
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location19_Game3), "Start")]
@@ -27,8 +27,6 @@ internal sealed class MilaMinigame3Patch : ScopedRandomPatch
     {
         RestoreRandom(__state);
 
-        const string MESSAGE = "Mila Game 3: solved board";
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-        KappiLogger.Log(MESSAGE);
+        EventManager.ShowEvent(new($"{nameof(BlessRng)}: Mila Game 3: board solved"));
     }
 }

@@ -16,7 +16,7 @@ internal sealed class MilaMinigame4Patch : ScopedRandomPatch
 {
     public override string Id => "com.kappimod.milaminigame4";
     public override string Name => "Mila Minigame 4 Patch";
-    public override string Description => "Mila invaders minigame: walls in one line at sides";
+    public override string Description => "Mila invaders mini-game: walls aligned in a single line on the sides";
 
     private const float WallXMax = 0.4f;
 
@@ -33,9 +33,8 @@ internal sealed class MilaMinigame4Patch : ScopedRandomPatch
         try
         {
             SnapGame4WallsToSides(__instance);
-            const string MESSAGE = "Mila Game 4: walls in one line at sides";
-            EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-            KappiLogger.Log(MESSAGE);
+
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Mila Game 4: walls aligned in a single line on the sides"));
         }
         catch (Exception ex)
         {

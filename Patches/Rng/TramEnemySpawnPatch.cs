@@ -34,8 +34,6 @@ internal sealed class TramEnemySpawnPatch : ScopedRandomPatch
             return;
         }
 
-        const string MESSAGE = "Tram: fixed enemy spawns";
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-        KappiLogger.Log(MESSAGE);
+        EventManager.ShowEvent(new($"{nameof(BlessRng)}: Tram: enemy spawns fixed"));
     }
 }

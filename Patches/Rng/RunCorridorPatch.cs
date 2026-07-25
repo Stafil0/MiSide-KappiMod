@@ -18,7 +18,7 @@ internal sealed class RunCorridorPatch : IPatch
     public string Id => "com.kappimod.runcorridor";
     public string Name => "Run Corridor Patch";
     public string Description =>
-        "Run & Hide corridor: only straights";
+        "Run & Hide corridor: straight paths only";
 
     private static bool _disabledRng;
 
@@ -54,9 +54,7 @@ internal sealed class RunCorridorPatch : IPatch
     {
         RestoreRng(__state);
 
-        const string MESSAGE = "Run & Hide: only straights";
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-        KappiLogger.Log(MESSAGE);
+        EventManager.ShowEvent(new($"{nameof(BlessRng)}: Run & Hide: straight paths only"));
     }
 
     [HarmonyPrefix]

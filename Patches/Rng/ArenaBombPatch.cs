@@ -18,7 +18,7 @@ internal sealed class ArenaBombPatch : IPatch
     public string Id => "com.kappimod.arenabomb";
     public string Name => "Arena Bomb Patch";
     public string Description =>
-        "Run & Hide bombs: fixed music/eyes timers";
+        "Run & Hide bombs: fixed music and eye timers";
 
     private static bool _disabledRng;
     private static int _phase;
@@ -64,9 +64,7 @@ internal sealed class ArenaBombPatch : IPatch
             return;
         }
 
-        const string MESSAGE = "Run & Hide bombs: fixed music/eyes timers";
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-        KappiLogger.Log(MESSAGE);
+        EventManager.ShowEvent(new($"{nameof(BlessRng)}: Run & Hide bombs: fixed music and eye timers"));
     }
 
     [HarmonyPrefix]
