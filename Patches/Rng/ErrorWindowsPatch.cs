@@ -44,10 +44,16 @@ internal sealed class ErrorWindowsPatch : IPatch
             __instance.errorWindowOKPosition.transform.localPosition = _firstPosition;
             __instance.errorWindowReady.transform.localPosition = _firstPosition;
 
-            __instance.positions = new(new Vector3[15]);
-            for (int i = 0; i < __instance.positions.Length; ++i)
+            var positions = __instance.positions;
+            if (positions == null)
             {
-                __instance.positions[i] = _firstPosition;
+                positions = new(__instance.positions.Length);
+                __instance.positions = positions;
+            }
+
+            for (int i = 0; i < positions.Length; i++)
+            {
+                positions[i] = _firstPosition;
             }
 
             EventManager.ShowEvent(
