@@ -45,9 +45,10 @@ internal sealed class ErrorWindowsPatch : IPatch
             __instance.errorWindowReady.transform.localPosition = _firstPosition;
 
             var positions = __instance.positions;
-            if (positions == null)
+            if (positions == null || positions.Length == 0)
             {
-                positions = new(__instance.positions.Length);
+                const int defaultLen = 15;
+                positions = new(defaultLen);
                 __instance.positions = positions;
             }
 
