@@ -1,5 +1,4 @@
 using HarmonyLib;
-using KappiMod.Logging;
 using KappiMod.Mods;
 using KappiMod.UI.Internal.EventDisplay;
 #if ML

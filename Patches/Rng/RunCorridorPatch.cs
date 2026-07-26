@@ -1,9 +1,7 @@
 using HarmonyLib;
-using KappiMod.Logging;
 using KappiMod.Mods;
 using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
-using UnityEngine;
 #if ML
 using Il2Cpp;
 #elif BIE

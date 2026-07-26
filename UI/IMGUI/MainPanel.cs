@@ -1,4 +1,3 @@
-using KappiMod.Config;
 using KappiMod.Constants;
 using KappiMod.Logging;
 using KappiMod.Mods;
