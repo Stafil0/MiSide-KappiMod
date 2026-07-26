@@ -1,6 +1,9 @@
 using HarmonyLib;
+using KappiMod.Logging;
 using KappiMod.Mods;
+using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
+using KappiMod.Utils;
 #if ML
 using Il2Cpp;
 #elif BIE
@@ -10,23 +13,45 @@ using BepInEx.IL2CPP;
 namespace KappiMod.Patches.Rng;
 
 [HarmonyPatch]
-internal sealed class PlayerIdPatch : ScopedRandomPatch
+internal sealed class PlayerIdPatch : IPatch
 {
-    public override string Id => "com.kappimod.playerid";
-    public override string Name => "Player ID Patch";
-    public override string Description =>
-        "Fixes the last chapter monitor ID";
+    public string Id => "com.kappimod.playerid";
+    public string Name => "Player ID Patch";
+    public string Description => "Fixes the last chapter monitor ID";
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location15_ScreenID), "Start")]
-    private static void BeforeStart(out bool __state) => __state = DisableRandom();
+    private readonly HarmonyLib.Harmony _harmony;
+
+    public PlayerIdPatch()
+    {
+        _harmony = new(Id);
+        _harmony.PatchAll(typeof(PlayerIdPatch));
+    }
+
+    public void Dispose()
+    {
+        _harmony.UnpatchSelf();
+    }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location15_ScreenID), "Start")]
-    private static void AfterStart(bool __state)
+    [HarmonyPatch(typeof(Location15_ScreenID), nameof(Location15_ScreenID.Start))]
+    private static void AfterStart(Location15_ScreenID __instance)
     {
-        RestoreRandom(__state);
+        try
+        {
+            __instance.IDplayer = "0000";
 
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: Player ID set to (0000)"));
+            var screens = __instance.textScreens;
+            string playerName = SteamHelper.Instance?.GetPersonaName() ?? "Player";
+            for (int i = 0; i < screens.Length; i++)
+            {
+                screens[i].m_Text = $"ID [{playerName}]:0000";
+            }
+
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Player ID set to 0000"));
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to restore random state", exception: ex);
+        }
     }
 }
