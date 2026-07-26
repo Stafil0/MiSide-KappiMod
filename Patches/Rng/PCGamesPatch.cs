@@ -14,12 +14,6 @@ namespace KappiMod.Patches.Rng;
 [HarmonyPatch]
 internal sealed class PCGamesPatch : IPatch
 {
-    private struct RandomState
-    {
-        public bool Enabled;
-        public bool ForceZeroRandom;
-    }
-
     public string Id => "com.kappimod.pcgames";
     public string Name => "PC Games Patch";
     public string Description => "The Real World PC mandatory sequence: files and sliders";
@@ -43,16 +37,11 @@ internal sealed class PCGamesPatch : IPatch
     [HarmonyPatch(typeof(Location14_PCGames), nameof(Location14_PCGames.OpenFilesGame))]
     private static void BeforeOpenFilesGame(out RandomState __state)
     {
-        __state = new RandomState
-        {
-            Enabled = DeterministicRandomPatch.Enabled,
-            ForceZeroRandom = DeterministicRandomPatch.ForceZeroRandom,
-        };
+        __state = DeterministicRandomPatch.GetState();
 
         try
         {
-            DeterministicRandomPatch.Enabled = true;
-            DeterministicRandomPatch.ForceZeroRandom = true;
+            DeterministicRandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
         {
@@ -66,8 +55,7 @@ internal sealed class PCGamesPatch : IPatch
     {
         try
         {
-            DeterministicRandomPatch.Enabled = __state.Enabled;
-            DeterministicRandomPatch.ForceZeroRandom = __state.ForceZeroRandom;
+            DeterministicRandomPatch.SetState(__state);
 
             EventManager.ShowEvent(new($"{nameof(BlessRng)}: PC files puzzle solved"));
         }
@@ -81,16 +69,11 @@ internal sealed class PCGamesPatch : IPatch
     [HarmonyPatch(typeof(Location14_PCGames), nameof(Location14_PCGames.OpenTreeGame))]
     private static void BeforeOpenTreeGame(out RandomState __state)
     {
-        __state = new RandomState
-        {
-            Enabled = DeterministicRandomPatch.Enabled,
-            ForceZeroRandom = DeterministicRandomPatch.ForceZeroRandom,
-        };
+        __state = DeterministicRandomPatch.GetState();
 
         try
         {
-            DeterministicRandomPatch.Enabled = true;
-            DeterministicRandomPatch.ForceZeroRandom = true;
+            DeterministicRandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
         {
@@ -104,8 +87,7 @@ internal sealed class PCGamesPatch : IPatch
     {
         try
         {
-            DeterministicRandomPatch.Enabled = __state.Enabled;
-            DeterministicRandomPatch.ForceZeroRandom = __state.ForceZeroRandom;
+            DeterministicRandomPatch.SetState(__state);
 
             EventManager.ShowEvent(new($"{nameof(BlessRng)}: PC slider puzzle solved"));
         }

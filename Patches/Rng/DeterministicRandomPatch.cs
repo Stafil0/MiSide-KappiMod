@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace KappiMod.Patches.Rng;
 
+public struct RandomState
+{
+    public bool? Enabled;
+    public int? ForcedSeed;
+    public bool? ForceZeroRandom;
+}
+
 [HarmonyPatch]
 public sealed class DeterministicRandomPatch : IPatch
 {
@@ -13,14 +20,14 @@ public sealed class DeterministicRandomPatch : IPatch
 
     public static bool IsInitialized => _harmony is not null;
 
-    private static bool _enbaled = false;
+    private static bool _enabled = false;
     public static bool Enabled
     {
-        get => _enbaled;
+        get => _enabled;
         set
         {
             ValidateHarmonyPatch();
-            _enbaled = value;
+            _enabled = value;
         }
     }
 
@@ -70,6 +77,33 @@ public sealed class DeterministicRandomPatch : IPatch
     public void Dispose()
     {
         _harmony?.UnpatchSelf();
+        _harmony = null;
+    }
+
+    public static RandomState GetState() =>
+        new()
+        {
+            Enabled = Enabled,
+            ForcedSeed = ForcedSeed,
+            ForceZeroRandom = ForceZeroRandom,
+        };
+
+    public static void SetState(RandomState state)
+    {
+        if (state.Enabled is bool enabled)
+        {
+            Enabled = enabled;
+        }
+
+        if (state.ForcedSeed is int seed)
+        {
+            ForcedSeed = seed;
+        }
+
+        if (state.ForceZeroRandom is bool force)
+        {
+            ForceZeroRandom = force;
+        }
     }
 
     private static void ValidateHarmonyPatch()
@@ -90,7 +124,7 @@ public sealed class DeterministicRandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.value), MethodType.Getter)]
     private static bool Value(ref float __result)
     {
-        if (!_enbaled)
+        if (!_enabled)
         {
             return true;
         }
@@ -113,7 +147,7 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool InsideUnitSphere(ref Vector3 __result)
     {
-        if (!_enbaled)
+        if (!_enabled)
         {
             return true;
         }
@@ -146,7 +180,7 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool InsideUnitCircle(ref Vector2 __result)
     {
-        if (!_enbaled)
+        if (!_enabled)
         {
             return true;
         }
@@ -175,7 +209,7 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool OnUnitSphere(ref Vector3 __result)
     {
-        if (!_enbaled)
+        if (!_enabled)
         {
             return true;
         }
@@ -207,7 +241,7 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool Rotation(ref Quaternion __result)
     {
-        if (!_enbaled)
+        if (!_enabled)
         {
             return true;
         }
@@ -260,7 +294,7 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool RangeFloat(float minInclusive, float maxInclusive, ref float __result)
     {
-        if (!_enbaled)
+        if (!_enabled)
         {
             return true;
         }
@@ -283,7 +317,7 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool RangeInt(int minInclusive, int maxExclusive, ref int __result)
     {
-        if (!_enbaled)
+        if (!_enabled)
         {
             return true;
         }
@@ -302,7 +336,7 @@ public sealed class DeterministicRandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.GetRandomUnitCircle))]
     private static bool GetRandomUnitCircle(out Vector2 output)
     {
-        if (!_enbaled)
+        if (!_enabled)
         {
             output = Vector2.zero;
             return true;
@@ -328,7 +362,7 @@ public sealed class DeterministicRandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.InitState))]
     private static void InitState(int seed)
     {
-        if (!_enbaled)
+        if (!_enabled)
         {
             return;
         }
