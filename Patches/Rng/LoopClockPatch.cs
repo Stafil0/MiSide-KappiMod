@@ -17,8 +17,7 @@ internal sealed class LoopClockPatch : IPatch
 {
     public string Id => "com.kappimod.loopclock";
     public string Name => "Loop Clock Patch";
-    public string Description =>
-        "Auto-matches the clock so no dialing is required";
+    public string Description => "Auto-matches the clock so no dialing is required";
 
     private const float SecondsPerCycle = 60f;
     private const float MinutesPerCycle = 12f;
