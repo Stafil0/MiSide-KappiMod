@@ -20,10 +20,11 @@ internal abstract class ScopedRandomPatch : IPatch
 
     protected static bool DisableRandom()
     {
-        var previous = DeterministicRandomPatch.DisabledRandom;
-        DeterministicRandomPatch.DisabledRandom = true;
+        var previous = DeterministicRandomPatch.ForceZeroRandom;
+        DeterministicRandomPatch.ForceZeroRandom = true;
         return previous;
     }
 
-    protected static void RestoreRandom(bool previous) => DeterministicRandomPatch.DisabledRandom = previous;
+    protected static void RestoreRandom(bool previous) =>
+        DeterministicRandomPatch.ForceZeroRandom = previous;
 }

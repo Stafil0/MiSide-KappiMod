@@ -39,7 +39,7 @@ public sealed class BlessRng : BaseMod
 
     private void RegisterPatches()
     {
-        _patchManager.RegisterPatch(new DeterministicRandomPatch(disabledRandom: false));
+        _patchManager.RegisterPatch(new DeterministicRandomPatch());
         _patchManager.RegisterPatch<ChibiDoorUnlockerPatch>();
         _patchManager.RegisterPatch<ChipMiniGamePatch>();
         _patchManager.RegisterPatch<FixedItemSpawnPatch>();

@@ -11,36 +11,57 @@ public sealed class DeterministicRandomPatch : IPatch
     public string Name => "Deterministic Random";
     public string Description => "Forces Unity's Random class to return deterministic values";
 
+    public static bool IsInitialized => _harmony is not null;
+
+    private static bool _enbaled = false;
+    public static bool Enabled
+    {
+        get => _enbaled;
+        set
+        {
+            ValidateHarmonyPatch();
+            _enbaled = value;
+        }
+    }
+
     private static int _forcedSeed = 12345;
     public static int ForcedSeed
     {
         get => _forcedSeed;
         set
         {
+            ValidateHarmonyPatch();
             _forcedSeed = value;
             _random = new System.Random(value);
-            UnityEngine.Random.InitState(value);
         }
     }
 
-    private static bool _disabledRandom = false;
-    public static bool DisabledRandom
+    private static bool _forceZeroRandom = false;
+    public static bool ForceZeroRandom
     {
-        get => _disabledRandom;
-        set => _disabledRandom = value;
+        get => _forceZeroRandom;
+        set
+        {
+            ValidateHarmonyPatch();
+            _forceZeroRandom = value;
+        }
     }
 
     private static System.Random _random = new(_forcedSeed);
 
-    private readonly HarmonyLib.Harmony _harmony;
+    private static HarmonyLib.Harmony? _harmony;
 
-    public DeterministicRandomPatch(int forcedSeed = 12345, bool disabledRandom = false)
+    public DeterministicRandomPatch(int forcedSeed = 12345, bool forceZeroRandom = false)
     {
+        if (IsInitialized)
+        {
+            return;
+        }
+
         _forcedSeed = forcedSeed;
-        _disabledRandom = disabledRandom;
+        _forceZeroRandom = forceZeroRandom;
 
         _random = new System.Random(_forcedSeed);
-        UnityEngine.Random.InitState(_forcedSeed);
 
         _harmony = new(Id);
         _harmony.PatchAll(typeof(DeterministicRandomPatch));
@@ -48,7 +69,19 @@ public sealed class DeterministicRandomPatch : IPatch
 
     public void Dispose()
     {
-        _harmony.UnpatchSelf();
+        _harmony?.UnpatchSelf();
+    }
+
+    private static void ValidateHarmonyPatch()
+    {
+        if (!IsInitialized)
+        {
+            throw new InvalidOperationException(
+                $"{nameof(DeterministicRandomPatch)} is not initialized. "
+                    + "Create an instance before using "
+                    + $"{nameof(Enabled)}, {nameof(ForcedSeed)}, or {nameof(ForceZeroRandom)}."
+            );
+        }
     }
 
     #region Getters Patches
@@ -57,7 +90,12 @@ public sealed class DeterministicRandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.value), MethodType.Getter)]
     private static bool Value(ref float __result)
     {
-        if (_disabledRandom)
+        if (!_enbaled)
+        {
+            return true;
+        }
+
+        if (_forceZeroRandom)
         {
             __result = 0.0f;
             return false;
@@ -75,7 +113,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool InsideUnitSphere(ref Vector3 __result)
     {
-        if (_disabledRandom)
+        if (!_enbaled)
+        {
+            return true;
+        }
+
+        if (_forceZeroRandom)
         {
             __result = Vector3.zero;
             return false;
@@ -103,7 +146,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool InsideUnitCircle(ref Vector2 __result)
     {
-        if (_disabledRandom)
+        if (!_enbaled)
+        {
+            return true;
+        }
+
+        if (_forceZeroRandom)
         {
             __result = Vector2.zero;
             return false;
@@ -127,7 +175,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool OnUnitSphere(ref Vector3 __result)
     {
-        if (_disabledRandom)
+        if (!_enbaled)
+        {
+            return true;
+        }
+
+        if (_forceZeroRandom)
         {
             __result = Vector3.zero;
             return false;
@@ -154,7 +207,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool Rotation(ref Quaternion __result)
     {
-        if (_disabledRandom)
+        if (!_enbaled)
+        {
+            return true;
+        }
+
+        if (_forceZeroRandom)
         {
             __result = Quaternion.identity;
             return false;
@@ -202,7 +260,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool RangeFloat(float minInclusive, float maxInclusive, ref float __result)
     {
-        if (_disabledRandom)
+        if (!_enbaled)
+        {
+            return true;
+        }
+
+        if (_forceZeroRandom)
         {
             __result = minInclusive;
             return false;
@@ -220,7 +283,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool RangeInt(int minInclusive, int maxExclusive, ref int __result)
     {
-        if (_disabledRandom)
+        if (!_enbaled)
+        {
+            return true;
+        }
+
+        if (_forceZeroRandom)
         {
             __result = minInclusive;
             return false;
@@ -232,12 +300,18 @@ public sealed class DeterministicRandomPatch : IPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.GetRandomUnitCircle))]
-    private static void GetRandomUnitCircle(out Vector2 output)
+    private static bool GetRandomUnitCircle(out Vector2 output)
     {
-        if (_disabledRandom)
+        if (!_enbaled)
         {
             output = Vector2.zero;
-            return;
+            return true;
+        }
+
+        if (_forceZeroRandom)
+        {
+            output = Vector2.zero;
+            return false;
         }
 
         float angle = 2.0f * Mathf.PI * (float)_random.NextDouble();
@@ -247,6 +321,20 @@ public sealed class DeterministicRandomPatch : IPatch
         float y = radius * Mathf.Sin(angle);
 
         output = new Vector2(x, y);
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.InitState))]
+    private static void InitState(int seed)
+    {
+        if (!_enbaled)
+        {
+            return;
+        }
+
+        _forcedSeed = seed;
+        _random = new System.Random(seed);
     }
 
     #endregion Methods Patches
