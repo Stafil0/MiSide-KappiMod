@@ -56,24 +56,6 @@ public sealed class DeterministicRandomPatch : IPatch
 
     public static void SetState(RandomState state) => GetSource().SetState(state);
 
-    public static bool Enabled
-    {
-        get => GetSource().Enabled;
-        set => GetSource().Enabled = value;
-    }
-
-    public static int ForcedSeed
-    {
-        get => GetSource().ForcedSeed;
-        set => GetSource().ForcedSeed = value;
-    }
-
-    public static bool ForceZeroRandom
-    {
-        get => GetSource().ForceZeroRandom;
-        set => GetSource().ForceZeroRandom = value;
-    }
-
     private static void ValidateHarmonyPatch()
     {
         if (!IsInitialized)
@@ -92,13 +74,12 @@ public sealed class DeterministicRandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.value), MethodType.Getter)]
     private static bool Value(ref float __result)
     {
-        var source = _source;
-        if (!source.Enabled)
+        if (!_source.Enabled)
         {
             return true;
         }
 
-        __result = source.Value();
+        __result = _source.Value();
         return false;
     }
 
@@ -110,13 +91,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool InsideUnitSphere(ref Vector3 __result)
     {
-        var source = _source;
-        if (!source.Enabled)
+        if (!_source.Enabled)
         {
             return true;
         }
 
-        __result = source.InsideUnitSphere();
+        __result = _source.InsideUnitSphere();
         return false;
     }
 
@@ -128,13 +108,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool InsideUnitCircle(ref Vector2 __result)
     {
-        var source = _source;
-        if (!source.Enabled)
+        if (!_source.Enabled)
         {
             return true;
         }
 
-        __result = source.InsideUnitCircle();
+        __result = _source.InsideUnitCircle();
         return false;
     }
 
@@ -146,13 +125,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool OnUnitSphere(ref Vector3 __result)
     {
-        var source = _source;
-        if (!source.Enabled)
+        if (!_source.Enabled)
         {
             return true;
         }
 
-        __result = source.OnUnitSphere();
+        __result = _source.OnUnitSphere();
         return false;
     }
 
@@ -164,13 +142,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool Rotation(ref Quaternion __result)
     {
-        var source = _source;
-        if (!source.Enabled)
+        if (!_source.Enabled)
         {
             return true;
         }
 
-        __result = source.Rotation();
+        __result = _source.Rotation();
         return false;
     }
 
@@ -182,13 +159,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool RotationUniform(ref Quaternion __result)
     {
-        var source = _source;
-        if (!source.Enabled)
+        if (!_source.Enabled)
         {
             return true;
         }
 
-        __result = source.RotationUniform();
+        __result = _source.RotationUniform();
         return false;
     }
 
@@ -204,13 +180,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool RangeFloat(float minInclusive, float maxInclusive, ref float __result)
     {
-        var source = _source;
-        if (!source.Enabled)
+        if (!_source.Enabled)
         {
             return true;
         }
 
-        __result = source.RangeFloat(minInclusive, maxInclusive);
+        __result = _source.RangeFloat(minInclusive, maxInclusive);
         return false;
     }
 
@@ -222,13 +197,12 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool RangeInt(int minInclusive, int maxExclusive, ref int __result)
     {
-        var source = _source;
-        if (!source.Enabled)
+        if (!_source.Enabled)
         {
             return true;
         }
 
-        __result = source.RangeInt(minInclusive, maxExclusive);
+        __result = _source.RangeInt(minInclusive, maxExclusive);
         return false;
     }
 
@@ -236,14 +210,13 @@ public sealed class DeterministicRandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.GetRandomUnitCircle))]
     private static bool GetRandomUnitCircle(out Vector2 output)
     {
-        var source = _source;
-        if (!source.Enabled)
+        if (!_source.Enabled)
         {
             output = Vector2.zero;
             return true;
         }
 
-        output = source.GetRandomUnitCircle();
+        output = _source.GetRandomUnitCircle();
         return false;
     }
 
@@ -251,13 +224,12 @@ public sealed class DeterministicRandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.InitState))]
     private static void InitState(int seed)
     {
-        var source = _source;
-        if (!source.Enabled)
+        if (!_source.Enabled)
         {
             return;
         }
 
-        source.ForcedSeed = seed;
+        _source.ForcedSeed = seed;
     }
 
     #endregion Methods Patches

@@ -9,8 +9,6 @@ List of mod patches here. If you found an error, or you have some suggestions, y
 1. [DeterministicRandomPatch](./DeterministicRandomPatch.cs) + [DeterministicRandom](./DeterministicRandom.cs)
 
    Makes random rolls in the game repeatable / forceable so other patches can remove RNG.
-   Policy lives on `DeterministicRandom` (virtual `Range*`); the patch is Harmony + `GetSource`/`SetSource` + `GetState`/`SetState`.
-   Most patches flip flags via `GetState`/`SetState`. Corridor/bomb swap in subclasses ([CorridorRandom](./CorridorRandom.cs), [ArenaBombRandom](./ArenaBombRandom.cs)).
 
 2. [ChibiDoorUnlockerPatch](./ChibiDoorUnlockerPatch.cs)
 

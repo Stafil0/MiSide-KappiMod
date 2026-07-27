@@ -9,9 +9,6 @@ public struct RandomState
     public bool? ForceZeroRandom;
 }
 
-/// <summary>
-/// Policy for deterministic Unity Random values. Subclass to override specific Range* methods.
-/// </summary>
 public class DeterministicRandom
 {
     private System.Random _random;

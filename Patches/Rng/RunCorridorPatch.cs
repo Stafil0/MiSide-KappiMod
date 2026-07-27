@@ -34,14 +34,13 @@ internal sealed class RunCorridorPatch : IPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
-    private static void BeforeStart(out DeterministicRandom __state) =>
-        __state = InstallCorridorSource();
+    private static void BeforeStart(out DeterministicRandom __state) => __state = ChangeRandomSource();
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
     private static void AfterStart(DeterministicRandom __state)
     {
-        RestoreSource(__state);
+        RestoreRandomSource(__state);
 
         try
         {
@@ -55,15 +54,13 @@ internal sealed class RunCorridorPatch : IPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
-    private static void BeforeCreateGeneration(out DeterministicRandom __state) =>
-        __state = InstallCorridorSource();
+    private static void BeforeCreateGeneration(out DeterministicRandom __state) => __state = ChangeRandomSource();
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
-    private static void AfterCreateGeneration(DeterministicRandom __state) =>
-        RestoreSource(__state);
+    private static void AfterCreateGeneration(DeterministicRandom __state) => RestoreRandomSource(__state);
 
-    private static DeterministicRandom InstallCorridorSource()
+    private static DeterministicRandom ChangeRandomSource()
     {
         var previous = DeterministicRandomPatch.GetSource();
 
@@ -81,7 +78,7 @@ internal sealed class RunCorridorPatch : IPatch
         return previous;
     }
 
-    private static void RestoreSource(DeterministicRandom previous)
+    private static void RestoreRandomSource(DeterministicRandom previous)
     {
         try
         {
@@ -91,5 +88,26 @@ internal sealed class RunCorridorPatch : IPatch
         {
             KappiLogger.LogException("Failed to restore random state", exception: ex);
         }
+    }
+}
+
+internal sealed class CorridorRandom : DeterministicRandom
+{
+    public CorridorRandom(DeterministicRandom from)
+        : base(from) { }
+
+    public override int RangeInt(int minInclusive, int maxExclusive)
+    {
+        if (maxExclusive <= minInclusive)
+        {
+            return base.RangeInt(minInclusive, maxExclusive);
+        }
+
+        if (minInclusive == 0 && maxExclusive == 2)
+        {
+            return 0;
+        }
+
+        return maxExclusive - 1;
     }
 }

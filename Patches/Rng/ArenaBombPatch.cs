@@ -3,6 +3,7 @@ using KappiMod.Logging;
 using KappiMod.Mods;
 using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
+using UnityEngine;
 #if ML
 using Il2Cpp;
 #elif BIE
@@ -31,15 +32,7 @@ internal sealed class ArenaBombPatch : IPatch
 
     public void Dispose()
     {
-        try
-        {
-            RestorePreviousSource();
-        }
-        catch (Exception ex)
-        {
-            KappiLogger.LogException("Failed to restore random source on dispose", exception: ex);
-        }
-
+        RestoreRandomSource();
         _harmony.UnpatchSelf();
     }
 
@@ -47,20 +40,14 @@ internal sealed class ArenaBombPatch : IPatch
     [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.PlayPhase))]
     private static void BeforePlayPhase(int x)
     {
-        try
+        if (x is not (1 or 2))
         {
-            if (x is not (1 or 2))
-            {
-                RestorePreviousSource();
-                return;
-            }
+            RestoreRandomSource();
+            return;
+        }
 
-            InstallBombSource(x);
-        }
-        catch (Exception ex)
-        {
-            KappiLogger.LogException("Failed to install arena bomb random", exception: ex);
-        }
+        var previous = ChangeRandomSource(x);
+        _previous ??= previous;
     }
 
     [HarmonyPostfix]
@@ -79,46 +66,78 @@ internal sealed class ArenaBombPatch : IPatch
     [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.MitaSwitchRecorder))]
     private static void BeforeSwitchRecorder()
     {
+        var previous = ChangeRandomSource(phase: 1);
+        _previous ??= previous;
+    }
+
+    private static DeterministicRandom ChangeRandomSource(int phase)
+    {
+        var previous = DeterministicRandomPatch.GetSource();
+
+        if (previous is ArenaBombRandom bomb && bomb.Phase == phase && bomb.Enabled)
+        {
+            return previous;
+        }
+
         try
         {
-            InstallBombSource(phase: 1);
+            var next = new ArenaBombRandom(previous, phase);
+            next.SetState(new() { Enabled = true, ForceZeroRandom = false });
+            DeterministicRandomPatch.SetSource(next);
         }
         catch (Exception ex)
         {
-            KappiLogger.LogException("Failed to install arena bomb random", exception: ex);
+            KappiLogger.LogException("Failed to disable random", exception: ex);
         }
+
+        return previous;
     }
 
-    private static void InstallBombSource(int phase)
-    {
-        var current = DeterministicRandomPatch.GetSource();
-
-        if (current is ArenaBombRandom bomb && bomb.Phase == phase && bomb.Enabled)
-        {
-            return;
-        }
-
-        if (current is not ArenaBombRandom)
-        {
-            _previous = current;
-        }
-
-        var basis = _previous ?? new DeterministicRandom(current);
-        _previous ??= basis;
-
-        var next = new ArenaBombRandom(basis, phase);
-        next.SetState(new() { Enabled = true, ForceZeroRandom = false });
-        DeterministicRandomPatch.SetSource(next);
-    }
-
-    private static void RestorePreviousSource()
+    private static void RestoreRandomSource()
     {
         if (_previous is null)
         {
             return;
         }
 
-        DeterministicRandomPatch.SetSource(_previous);
+        try
+        {
+            DeterministicRandomPatch.SetSource(_previous);
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to restore random state", exception: ex);
+        }
+
         _previous = null;
     }
+}
+
+internal sealed class ArenaBombRandom : DeterministicRandom
+{
+    public int Phase { get; }
+
+    public ArenaBombRandom(DeterministicRandom from, int phase)
+        : base(from)
+    {
+        Phase = phase;
+    }
+
+    public override float RangeFloat(float minInclusive, float maxInclusive) =>
+        Phase switch
+        {
+            // Music ON
+            1 when Approx(minInclusive, 2f) && Approx(maxInclusive, 4f) => 4f,
+            // Music OFF
+            1 when Approx(minInclusive, 1f) && Approx(maxInclusive, 2f) => 1f,
+            // Eyes closed (first time)
+            2 when Approx(minInclusive, 3f) && Approx(maxInclusive, 6f) => 4f,
+            // Eyes closed (consecutive time)
+            2 when Approx(minInclusive, 2f) && Approx(maxInclusive, 3f) => 3f,
+            // Eyes open window
+            2 when Approx(minInclusive, -5f) && Approx(maxInclusive, -4f) => -4f,
+            _ => base.RangeFloat(minInclusive, maxInclusive),
+        };
+
+    private static bool Approx(float a, float b) => Mathf.Abs(a - b) < 0.001f;
 }
