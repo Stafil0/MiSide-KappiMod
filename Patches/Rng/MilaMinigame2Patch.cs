@@ -1,6 +1,7 @@
 using HarmonyLib;
 using KappiMod.Logging;
 using KappiMod.Mods;
+using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
 using UnityEngine;
 #if ML
@@ -12,11 +13,11 @@ using BepInEx.IL2CPP;
 namespace KappiMod.Patches.Rng;
 
 [HarmonyPatch]
-internal sealed class MilaMinigame2Patch : ScopedRandomPatch
+internal sealed class MilaMinigame2Patch : IPatch
 {
-    public override string Id => "com.kappimod.milaminigame2";
-    public override string Name => "Mila Minigame 2 Patch";
-    public override string Description => "Mila towers mini-game: zigzag pattern";
+    public string Id => "com.kappimod.milaminigame2";
+    public string Name => "Mila Minigame 2 Patch";
+    public string Description => "Mila towers mini-game: zigzag pattern";
 
     private const float MinCatchRadius = 0.25f;
     private const float MinStepMult = 0.7f;
@@ -25,18 +26,40 @@ internal sealed class MilaMinigame2Patch : ScopedRandomPatch
     private const float LastTowerDirZ = 0.225f;
     private const float VisualScaleFactor = 0.2f;
 
+    private readonly HarmonyLib.Harmony _harmony;
+
+    public MilaMinigame2Patch()
+    {
+        _harmony = new(Id);
+        _harmony.PatchAll(typeof(MilaMinigame2Patch));
+    }
+
+    public void Dispose() => _harmony.UnpatchSelf();
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location19_Game2), "Start")]
-    private static void BeforeGame2Start(out bool __state) => __state = DisableRandom();
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location19_Game2), "Start")]
-    private static void AfterGame2Start(Location19_Game2 __instance, bool __state)
+    private static void BeforeGame2Start(out RandomState __state)
     {
-        RestoreRandom(__state);
+        __state = DeterministicRandomPatch.GetState();
 
         try
         {
+            DeterministicRandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to disable random", exception: ex);
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Location19_Game2), "Start")]
+    private static void AfterGame2Start(Location19_Game2 __instance, RandomState __state)
+    {
+        try
+        {
+            DeterministicRandomPatch.SetState(__state);
+
             ApplyGame2ZigzagLayout(__instance);
 
             EventManager.ShowEvent(new($"{nameof(BlessRng)}: Mila Game 2: zigzag pattern applied"));

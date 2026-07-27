@@ -1,5 +1,7 @@
 using HarmonyLib;
+using KappiMod.Logging;
 using KappiMod.Mods;
+using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
 #if ML
 using Il2Cpp;
@@ -10,22 +12,51 @@ using BepInEx.IL2CPP;
 namespace KappiMod.Patches.Rng;
 
 [HarmonyPatch]
-internal sealed class MilaMinigame3Patch : ScopedRandomPatch
+internal sealed class MilaMinigame3Patch : IPatch
 {
-    public override string Id => "com.kappimod.milaminigame3";
-    public override string Name => "Mila Minigame 3 Patch";
-    public override string Description => "Mila figures mini-game: solved board";
+    public string Id => "com.kappimod.milaminigame3";
+    public string Name => "Mila Minigame 3 Patch";
+    public string Description => "Mila figures mini-game: solved board";
+
+    private readonly HarmonyLib.Harmony _harmony;
+
+    public MilaMinigame3Patch()
+    {
+        _harmony = new(Id);
+        _harmony.PatchAll(typeof(MilaMinigame3Patch));
+    }
+
+    public void Dispose() => _harmony.UnpatchSelf();
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location19_Game3), "Start")]
-    private static void BeforeGame3Start(out bool __state) => __state = DisableRandom();
+    private static void BeforeGame3Start(out RandomState __state)
+    {
+        __state = DeterministicRandomPatch.GetState();
+
+        try
+        {
+            DeterministicRandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to disable random", exception: ex);
+        }
+    }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Location19_Game3), "Start")]
-    private static void AfterGame3Start(bool __state)
+    private static void AfterGame3Start(RandomState __state)
     {
-        RestoreRandom(__state);
+        try
+        {
+            DeterministicRandomPatch.SetState(__state);
 
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: Mila Game 3: board solved"));
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Mila Game 3: board solved"));
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to restore random state", exception: ex);
+        }
     }
 }
