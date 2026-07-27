@@ -1,4 +1,5 @@
 using HarmonyLib;
+using KappiMod.Logging;
 using KappiMod.Mods;
 using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
@@ -18,8 +19,6 @@ internal sealed class RunCorridorPatch : IPatch
     public string Description =>
         "Run & Hide corridor: straight paths only";
 
-    private static bool _disabledRng;
-
     private readonly HarmonyLib.Harmony _harmony;
 
     public RunCorridorPatch()
@@ -33,51 +32,64 @@ internal sealed class RunCorridorPatch : IPatch
         _harmony.UnpatchSelf();
     }
 
-    private static bool DisableRng()
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
+    private static void BeforeStart(out DeterministicRandom __state) =>
+        __state = InstallCorridorSource();
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
+    private static void AfterStart(DeterministicRandom __state)
     {
-        var previous = _disabledRng;
-        _disabledRng = true;
+        RestoreSource(__state);
+
+        try
+        {
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Run & Hide: straight paths only"));
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to show corridor event", exception: ex);
+        }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
+    private static void BeforeCreateGeneration(out DeterministicRandom __state) =>
+        __state = InstallCorridorSource();
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
+    private static void AfterCreateGeneration(DeterministicRandom __state) =>
+        RestoreSource(__state);
+
+    private static DeterministicRandom InstallCorridorSource()
+    {
+        var previous = DeterministicRandomPatch.GetSource();
+
+        try
+        {
+            var next = new CorridorRandom(previous);
+            next.SetState(new() { Enabled = true, ForceZeroRandom = true });
+            DeterministicRandomPatch.SetSource(next);
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to disable random", exception: ex);
+        }
+
         return previous;
     }
 
-    private static void RestoreRng(bool previous) => _disabledRng = previous;
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
-    private static void BeforeStart(out bool __state) => __state = DisableRng();
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
-    private static void AfterStart(bool __state)
+    private static void RestoreSource(DeterministicRandom previous)
     {
-        RestoreRng(__state);
-
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: Run & Hide: straight paths only"));
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
-    private static void BeforeCreateGeneration(out bool __state) => __state = DisableRng();
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
-    private static void AfterCreateGeneration(bool __state) => RestoreRng(__state);
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.Range), new[] { typeof(int), typeof(int) })]
-    private static void AfterRangeInt(int minInclusive, int maxExclusive, ref int __result)
-    {
-        if (!_disabledRng || maxExclusive <= minInclusive)
+        try
         {
-            return;
+            DeterministicRandomPatch.SetSource(previous);
         }
-
-        if (minInclusive == 0 && maxExclusive == 2)
+        catch (Exception ex)
         {
-            __result = 0;
-            return;
+            KappiLogger.LogException("Failed to restore random state", exception: ex);
         }
-
-        __result = maxExclusive - 1;
     }
 }

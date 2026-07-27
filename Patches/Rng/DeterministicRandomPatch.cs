@@ -4,13 +4,6 @@ using UnityEngine;
 
 namespace KappiMod.Patches.Rng;
 
-public struct RandomState
-{
-    public bool? Enabled;
-    public int? ForcedSeed;
-    public bool? ForceZeroRandom;
-}
-
 [HarmonyPatch]
 public sealed class DeterministicRandomPatch : IPatch
 {
@@ -20,42 +13,7 @@ public sealed class DeterministicRandomPatch : IPatch
 
     public static bool IsInitialized => _harmony is not null;
 
-    private static bool _enabled = false;
-    public static bool Enabled
-    {
-        get => _enabled;
-        set
-        {
-            ValidateHarmonyPatch();
-            _enabled = value;
-        }
-    }
-
-    private static int _forcedSeed = 12345;
-    public static int ForcedSeed
-    {
-        get => _forcedSeed;
-        set
-        {
-            ValidateHarmonyPatch();
-            _forcedSeed = value;
-            _random = new System.Random(value);
-        }
-    }
-
-    private static bool _forceZeroRandom = false;
-    public static bool ForceZeroRandom
-    {
-        get => _forceZeroRandom;
-        set
-        {
-            ValidateHarmonyPatch();
-            _forceZeroRandom = value;
-        }
-    }
-
-    private static System.Random _random = new(_forcedSeed);
-
+    private static DeterministicRandom _source = new();
     private static HarmonyLib.Harmony? _harmony;
 
     public DeterministicRandomPatch(int forcedSeed = 12345, bool forceZeroRandom = false)
@@ -65,10 +23,11 @@ public sealed class DeterministicRandomPatch : IPatch
             return;
         }
 
-        _forcedSeed = forcedSeed;
-        _forceZeroRandom = forceZeroRandom;
-
-        _random = new System.Random(_forcedSeed);
+        _source = new DeterministicRandom(
+            enabled: false,
+            forcedSeed: forcedSeed,
+            forceZeroRandom: forceZeroRandom
+        );
 
         _harmony = new(Id);
         _harmony.PatchAll(typeof(DeterministicRandomPatch));
@@ -78,32 +37,41 @@ public sealed class DeterministicRandomPatch : IPatch
     {
         _harmony?.UnpatchSelf();
         _harmony = null;
+        _source = new();
     }
 
-    public static RandomState GetState() =>
-        new()
-        {
-            Enabled = Enabled,
-            ForcedSeed = ForcedSeed,
-            ForceZeroRandom = ForceZeroRandom,
-        };
-
-    public static void SetState(RandomState state)
+    public static DeterministicRandom GetSource()
     {
-        if (state.Enabled is bool enabled)
-        {
-            Enabled = enabled;
-        }
+        ValidateHarmonyPatch();
+        return _source;
+    }
 
-        if (state.ForcedSeed is int seed)
-        {
-            ForcedSeed = seed;
-        }
+    public static void SetSource(DeterministicRandom source)
+    {
+        ValidateHarmonyPatch();
+        _source = source ?? throw new ArgumentNullException(nameof(source));
+    }
 
-        if (state.ForceZeroRandom is bool force)
-        {
-            ForceZeroRandom = force;
-        }
+    public static RandomState GetState() => GetSource().GetState();
+
+    public static void SetState(RandomState state) => GetSource().SetState(state);
+
+    public static bool Enabled
+    {
+        get => GetSource().Enabled;
+        set => GetSource().Enabled = value;
+    }
+
+    public static int ForcedSeed
+    {
+        get => GetSource().ForcedSeed;
+        set => GetSource().ForcedSeed = value;
+    }
+
+    public static bool ForceZeroRandom
+    {
+        get => GetSource().ForceZeroRandom;
+        set => GetSource().ForceZeroRandom = value;
     }
 
     private static void ValidateHarmonyPatch()
@@ -113,7 +81,7 @@ public sealed class DeterministicRandomPatch : IPatch
             throw new InvalidOperationException(
                 $"{nameof(DeterministicRandomPatch)} is not initialized. "
                     + "Create an instance before using "
-                    + $"{nameof(Enabled)}, {nameof(ForcedSeed)}, or {nameof(ForceZeroRandom)}."
+                    + $"{nameof(GetSource)}, {nameof(SetSource)}, {nameof(GetState)}, or {nameof(SetState)}."
             );
         }
     }
@@ -124,18 +92,13 @@ public sealed class DeterministicRandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.value), MethodType.Getter)]
     private static bool Value(ref float __result)
     {
-        if (!_enabled)
+        var source = _source;
+        if (!source.Enabled)
         {
             return true;
         }
 
-        if (_forceZeroRandom)
-        {
-            __result = 0.0f;
-            return false;
-        }
-
-        __result = (float)_random.NextDouble();
+        __result = source.Value();
         return false;
     }
 
@@ -147,28 +110,13 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool InsideUnitSphere(ref Vector3 __result)
     {
-        if (!_enabled)
+        var source = _source;
+        if (!source.Enabled)
         {
             return true;
         }
 
-        if (_forceZeroRandom)
-        {
-            __result = Vector3.zero;
-            return false;
-        }
-
-        float phi = 2.0f * Mathf.PI * (float)_random.NextDouble();
-        float cosTheta = 2.0f * (float)_random.NextDouble() - 1.0f;
-        float radius = Mathf.Pow((float)_random.NextDouble(), 1.0f / 3.0f);
-
-        float sinTheta = Mathf.Sqrt(1.0f - cosTheta * cosTheta);
-
-        float x = radius * sinTheta * Mathf.Cos(phi);
-        float y = radius * sinTheta * Mathf.Sin(phi);
-        float z = radius * cosTheta;
-
-        __result = new Vector3(x, y, z);
+        __result = source.InsideUnitSphere();
         return false;
     }
 
@@ -180,24 +128,13 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool InsideUnitCircle(ref Vector2 __result)
     {
-        if (!_enabled)
+        var source = _source;
+        if (!source.Enabled)
         {
             return true;
         }
 
-        if (_forceZeroRandom)
-        {
-            __result = Vector2.zero;
-            return false;
-        }
-
-        float angle = 2.0f * Mathf.PI * (float)_random.NextDouble();
-        float radius = Mathf.Sqrt((float)_random.NextDouble());
-
-        float x = radius * Mathf.Cos(angle);
-        float y = radius * Mathf.Sin(angle);
-
-        __result = new Vector2(x, y);
+        __result = source.InsideUnitCircle();
         return false;
     }
 
@@ -209,27 +146,13 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool OnUnitSphere(ref Vector3 __result)
     {
-        if (!_enabled)
+        var source = _source;
+        if (!source.Enabled)
         {
             return true;
         }
 
-        if (_forceZeroRandom)
-        {
-            __result = Vector3.zero;
-            return false;
-        }
-
-        float u1 = (float)_random.NextDouble();
-        float u2 = (float)_random.NextDouble();
-        float sqrtU1 = Mathf.Sqrt(u1);
-        float phi = 2.0f * Mathf.PI * u2;
-
-        float x = sqrtU1 * Mathf.Cos(phi);
-        float y = sqrtU1 * Mathf.Sin(phi);
-        float z = Mathf.Sqrt(1.0f - u1);
-
-        __result = new Vector3(x, y, z);
+        __result = source.OnUnitSphere();
         return false;
     }
 
@@ -241,33 +164,13 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool Rotation(ref Quaternion __result)
     {
-        if (!_enabled)
+        var source = _source;
+        if (!source.Enabled)
         {
             return true;
         }
 
-        if (_forceZeroRandom)
-        {
-            __result = Quaternion.identity;
-            return false;
-        }
-
-        float u1 = (float)_random.NextDouble();
-        float u2 = (float)_random.NextDouble();
-        float u3 = (float)_random.NextDouble();
-
-        float sqrt1MinusU1 = Mathf.Sqrt(1.0f - u1);
-        float sqrtU1 = Mathf.Sqrt(u1);
-
-        float twoPI_U2 = 2.0f * Mathf.PI * u2;
-        float twoPI_U3 = 2.0f * Mathf.PI * u3;
-
-        float x = sqrt1MinusU1 * Mathf.Sin(twoPI_U2);
-        float y = sqrt1MinusU1 * Mathf.Cos(twoPI_U2);
-        float z = sqrtU1 * Mathf.Sin(twoPI_U3);
-        float w = sqrtU1 * Mathf.Cos(twoPI_U3);
-
-        __result = new Quaternion(x, y, z, w);
+        __result = source.Rotation();
         return false;
     }
 
@@ -279,7 +182,14 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool RotationUniform(ref Quaternion __result)
     {
-        return Rotation(ref __result);
+        var source = _source;
+        if (!source.Enabled)
+        {
+            return true;
+        }
+
+        __result = source.RotationUniform();
+        return false;
     }
 
     #endregion Getters Patches
@@ -294,18 +204,13 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool RangeFloat(float minInclusive, float maxInclusive, ref float __result)
     {
-        if (!_enabled)
+        var source = _source;
+        if (!source.Enabled)
         {
             return true;
         }
 
-        if (_forceZeroRandom)
-        {
-            __result = minInclusive;
-            return false;
-        }
-
-        __result = minInclusive + (float)_random.NextDouble() * (maxInclusive - minInclusive);
+        __result = source.RangeFloat(minInclusive, maxInclusive);
         return false;
     }
 
@@ -317,18 +222,13 @@ public sealed class DeterministicRandomPatch : IPatch
     )]
     private static bool RangeInt(int minInclusive, int maxExclusive, ref int __result)
     {
-        if (!_enabled)
+        var source = _source;
+        if (!source.Enabled)
         {
             return true;
         }
 
-        if (_forceZeroRandom)
-        {
-            __result = minInclusive;
-            return false;
-        }
-
-        __result = _random.Next(minInclusive, maxExclusive);
+        __result = source.RangeInt(minInclusive, maxExclusive);
         return false;
     }
 
@@ -336,25 +236,14 @@ public sealed class DeterministicRandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.GetRandomUnitCircle))]
     private static bool GetRandomUnitCircle(out Vector2 output)
     {
-        if (!_enabled)
+        var source = _source;
+        if (!source.Enabled)
         {
             output = Vector2.zero;
             return true;
         }
 
-        if (_forceZeroRandom)
-        {
-            output = Vector2.zero;
-            return false;
-        }
-
-        float angle = 2.0f * Mathf.PI * (float)_random.NextDouble();
-        float radius = Mathf.Sqrt((float)_random.NextDouble());
-
-        float x = radius * Mathf.Cos(angle);
-        float y = radius * Mathf.Sin(angle);
-
-        output = new Vector2(x, y);
+        output = source.GetRandomUnitCircle();
         return false;
     }
 
@@ -362,13 +251,13 @@ public sealed class DeterministicRandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.InitState))]
     private static void InitState(int seed)
     {
-        if (!_enabled)
+        var source = _source;
+        if (!source.Enabled)
         {
             return;
         }
 
-        _forcedSeed = seed;
-        _random = new System.Random(seed);
+        source.ForcedSeed = seed;
     }
 
     #endregion Methods Patches
