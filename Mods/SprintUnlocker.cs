@@ -15,7 +15,7 @@ namespace KappiMod.Mods;
 [ModInfo(
     name: "Sprint Unlocker",
     description: "Unlocks the sprinting ability in the game.",
-    version: "1.0.0",
+    version: "1.0.1",
     author: BuildInfo.COMPANY
 )]
 public sealed class SprintUnlocker : BaseMod

@@ -15,7 +15,7 @@ namespace KappiMod.Mods;
 [ModInfo(
     name: "Flashlight Increaser",
     description: "Enhances the flashlight range and angle for better visibility",
-    version: "1.0.0",
+    version: "1.0.1",
     author: BuildInfo.COMPANY
 )]
 public sealed class FlashlightIncreaser : BaseMod
