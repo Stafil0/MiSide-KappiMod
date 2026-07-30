@@ -17,7 +17,7 @@ namespace KappiMod.UI.IMGUI;
 
 public class MainPanel : PanelBase
 {
-    private const ulong AUTHOR_STEAM_ID = 76561198034791437;
+    private const ulong DEV_STEAM_ID = 76561198034791437;
 
     private readonly List<Toggle> _modToggles = new();
     private readonly List<Toggle> _speedrunModToggles = new();
@@ -332,7 +332,7 @@ public class MainPanel : PanelBase
 
                 if (
                     SceneManager.GetActiveScene().name is not SceneName.MAIN_MENU
-                    && SteamHelper.Instance?.GetSteamID() != AUTHOR_STEAM_ID
+                    && SteamHelper.Instance?.GetSteamID() != DEV_STEAM_ID
                 )
                 {
                     MessageBox.Show("This mod toggled only in the main menu");
@@ -401,7 +401,7 @@ public class MainPanel : PanelBase
 
                 if (
                     SceneManager.GetActiveScene().name is not SceneName.MAIN_MENU
-                    && SteamHelper.Instance?.GetSteamID() != AUTHOR_STEAM_ID
+                    && SteamHelper.Instance?.GetSteamID() != DEV_STEAM_ID
                 )
                 {
                     MessageBox.Show("This mod toggled only in the main menu");
@@ -445,7 +445,7 @@ public class MainPanel : PanelBase
 
     private void DisableAllModToggles()
     {
-        if (SteamHelper.Instance?.GetSteamID() == AUTHOR_STEAM_ID)
+        if (SteamHelper.Instance?.GetSteamID() == DEV_STEAM_ID)
         {
             return;
         }
