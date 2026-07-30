@@ -2,3 +2,7 @@
 
 bin
 obj
+
+Directory.Build.props
+Directory.Build.targets
+Directory.Build.user.props

@@ -15,7 +15,7 @@ using DialogueSceneMappings = Dictionary<string, Dictionary<string, int>>;
 [ModInfo(
     name: "Dialogue Skipper",
     description: "Skip certain dialogue sections in the game",
-    version: "1.2.0",
+    version: "1.3.0",
     author: BuildInfo.COMPANY
 )]
 public sealed class DialogueSkipper : BaseMod
@@ -108,7 +108,7 @@ public sealed class DialogueSkipper : BaseMod
             return;
         }
 
-        args.DialogueInstance.SkipDialogue();
+        args.Skip();
         LogDialogueInfo(args);
     }
 

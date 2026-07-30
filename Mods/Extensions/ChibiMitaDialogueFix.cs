@@ -100,7 +100,7 @@ internal class ChibiMitaDialogueFix
 
     private bool TryFindChibiMita()
     {
-        if (!UnityHelpers.IsNullOrDestroyed(_cachedChibiMita))
+        if (!_cachedChibiMita.IsNullOrDestroyed())
         {
             return true;
         }
@@ -110,7 +110,7 @@ internal class ChibiMitaDialogueFix
             ?.FirstOrDefault(x => x.name == "ChibiMita")
             ?.Cast<Mob_ChibiMita>();
 
-        bool isFound = !UnityHelpers.IsNullOrDestroyed(_cachedChibiMita);
+        bool isFound = !_cachedChibiMita.IsNullOrDestroyed();
         KappiLogger.Log($"ChibiMita {(isFound ? "found" : "not found")}");
         return isFound;
     }

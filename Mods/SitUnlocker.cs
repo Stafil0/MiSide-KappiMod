@@ -15,7 +15,7 @@ namespace KappiMod.Mods;
 [ModInfo(
     name: "Sit Unlocker",
     description: "Unlocks the ability to sit in the game.",
-    version: "1.0.0",
+    version: "1.0.1",
     author: BuildInfo.COMPANY
 )]
 public sealed class SitUnlocker : BaseMod
@@ -49,7 +49,7 @@ public sealed class SitUnlocker : BaseMod
     protected override void OnDisable()
     {
         KappiCore.Loader.Update -= OnUpdate;
-        if (!UnityHelpers.IsNullOrDestroyed(_cachedPlayerMove))
+        if (!_cachedPlayerMove.IsNullOrDestroyed())
         {
             SetPlayerSitState(false);
             _cachedPlayerMove = null;
@@ -84,12 +84,12 @@ public sealed class SitUnlocker : BaseMod
 
     private bool TryFindPlayerMove()
     {
-        if (!UnityHelpers.IsNullOrDestroyed(_cachedPlayerMove))
+        if (!_cachedPlayerMove.IsNullOrDestroyed())
         {
             return true;
         }
 
         _cachedPlayerMove = GameObject.Find("Player")?.GetComponent<PlayerMove>();
-        return !UnityHelpers.IsNullOrDestroyed(_cachedPlayerMove);
+        return !_cachedPlayerMove.IsNullOrDestroyed();
     }
 }

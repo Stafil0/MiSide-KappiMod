@@ -15,7 +15,7 @@ namespace KappiMod.Mods;
 [ModInfo(
     name: "Flashlight Increaser",
     description: "Enhances the flashlight range and angle for better visibility",
-    version: "1.0.0",
+    version: "1.0.1",
     author: BuildInfo.COMPANY
 )]
 public sealed class FlashlightIncreaser : BaseMod
@@ -138,13 +138,13 @@ public sealed class FlashlightIncreaser : BaseMod
 
     private bool TryFindWorldPlayer()
     {
-        if (!UnityHelpers.IsNullOrDestroyed(_cachedWorldPlayer))
+        if (!_cachedWorldPlayer.IsNullOrDestroyed())
         {
             return true;
         }
 
         _cachedWorldPlayer = GameObject.Find("World")?.GetComponent<WorldPlayer>();
-        return !UnityHelpers.IsNullOrDestroyed(_cachedWorldPlayer);
+        return !_cachedWorldPlayer.IsNullOrDestroyed();
     }
 
     private void ResetState()
