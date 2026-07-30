@@ -20,7 +20,7 @@ internal sealed class FixedItemSpawnPatch : IPatch
 {
     public string Id => "com.kappimod.fixeditemspawn";
     public string Name => "Fixed Item Spawn Patch";
-    public string Description => "Set fixed item spawn positions in Chapter 2";
+    public string Description => "Sets fixed item spawn positions in Chapter 2";
 
     private static readonly TransformPositions _pencilTransform = new()
     {
@@ -82,9 +82,7 @@ internal sealed class FixedItemSpawnPatch : IPatch
 
             __instance.items = newTransforms;
 
-            const string MESSAGE = "Fixed items positions set";
-            EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-            KappiLogger.Log(MESSAGE);
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Fixed item positions have been set"));
         }
         catch (Exception ex)
         {
@@ -119,9 +117,7 @@ internal sealed class FixedItemSpawnPatch : IPatch
                             _scissorsTransform.rotation[0]
                         );
 
-                        const string MESSAGE = "Scissors positions set";
-                        EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-                        KappiLogger.Log(MESSAGE);
+                        EventManager.ShowEvent(new($"{nameof(BlessRng)}: Scissors positions have been set"));
                     }
                 ),
                 DELAY_SEC

@@ -19,7 +19,7 @@ internal sealed class ChibiDoorUnlockerPatch : IPatch
 {
     public string Id => "com.kappimod.chibidoorunlocker";
     public string Name => "Chibi Door Unlocker";
-    public string Description => "Unlocks the door without catching chibi guys";
+    public string Description => "Unlocks the door without catching the Chibi guys";
 
     private const string DOOR_PATH = "House/Doors/DoorCage ChibiPlayers - NextLadder/DoorPhysic";
 
@@ -54,9 +54,7 @@ internal sealed class ChibiDoorUnlockerPatch : IPatch
 
             UnlockDoor();
 
-            const string MESSAGE = "Chibi door unlocked";
-            EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-            KappiLogger.Log(MESSAGE);
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Chibi door unlocked"));
         }
         catch (Exception ex)
         {
@@ -75,9 +73,7 @@ internal sealed class ChibiDoorUnlockerPatch : IPatch
         {
             bool found = TryFindDoor();
 
-            string message = "Chibi door " + (found ? "found" : "not found");
-            EventManager.ShowEvent(new($"{nameof(BlessRng)}: {message}"));
-            KappiLogger.Log(message);
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Chibi door {(found ? "was found" : "was not found")}"));
         }
         catch (Exception ex)
         {

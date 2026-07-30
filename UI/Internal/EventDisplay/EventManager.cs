@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using KappiMod.Logging;
 #if ML
 using Il2Cpp;
 #elif BIE
@@ -25,6 +26,8 @@ internal static class EventManager
 
     internal static void ShowEvent(ModEvent modEvent)
     {
+        KappiLogger.Log(modEvent.EventString);
+
         EnsureObjectsSelected();
         GameObject? hintScreenObject = UnityEngine.Object.Instantiate(
             _hintScreenTemplate,

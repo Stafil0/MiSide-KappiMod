@@ -16,7 +16,7 @@ internal sealed class PassableDummiesPatch : IPatch
 {
     public string Id => "com.kappimod.passabledummies";
     public string Name => "Passable Dummies Patch";
-    public string Description => "Makes all dummies passable, removing the RNG from mini-game";
+    public string Description => "Makes all dummies passable, removing the RNG from the mini-game";
 
     private readonly HarmonyLib.Harmony _harmony;
 
@@ -48,9 +48,7 @@ internal sealed class PassableDummiesPatch : IPatch
                 __instance.indexBedManeken = 1;
             }
 
-            const string MESSAGE = "Dummy properties set";
-            EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-            KappiLogger.Log(MESSAGE);
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Dummy properties have been set"));
         }
         catch (Exception ex)
         {

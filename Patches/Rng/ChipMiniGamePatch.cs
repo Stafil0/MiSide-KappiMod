@@ -18,7 +18,7 @@ internal sealed class ChipMiniGamePatch : IPatch
     public string Id => "com.kappimod.chipminigame";
     public string Name => "Chip Mini Game Patch";
     public string Description =>
-        "Removes randomness from the chip mini-game by fixing start/end points";
+        "Removes randomness from the chip mini-game by fixing the start and end points";
 
     private static readonly Vector3 _pointStart = new(-0.982f, 0.069f, 0.2185f);
     private static readonly Vector3 _pointFinish = new(0.982f, 0.069f, 0.2185f);
@@ -45,9 +45,7 @@ internal sealed class ChipMiniGamePatch : IPatch
             __instance.pointStart.gameObject.transform.localPosition = _pointStart;
             __instance.pointFinish.gameObject.transform.localPosition = _pointFinish;
 
-            const string MESSAGE = "Chip mini-game points set to fixed values";
-            EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-            KappiLogger.Log(MESSAGE);
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Chip mini-game points were set to fixed values"));
         }
         catch (Exception ex)
         {
