@@ -5,6 +5,8 @@ using KappiMod.Logging;
 using KappiMod.Mods.Core;
 using KappiMod.Mods.Extensions;
 using KappiMod.Patches;
+using KappiMod.Patches.Core;
+using KappiMod.Patches.Rng;
 using KappiMod.Properties;
 using KappiMod.UI.Internal.EventDisplay;
 
@@ -15,7 +17,7 @@ using DialogueSceneMappings = Dictionary<string, Dictionary<string, int>>;
 [ModInfo(
     name: "Dialogue Skipper",
     description: "Skip certain dialogue sections in the game",
-    version: "1.3.0",
+    version: "2.0.0",
     author: BuildInfo.COMPANY
 )]
 public sealed class DialogueSkipper : BaseMod
@@ -45,14 +47,9 @@ public sealed class DialogueSkipper : BaseMod
         },
     };
 
-    private readonly DialogueStartPatch _dialoguePatch;
-    private readonly ChibiMitaDialogueFix _chibiMitaDialogueFixer;
-
-    public DialogueSkipper()
-    {
-        _dialoguePatch = new();
-        _chibiMitaDialogueFixer = new(_dialoguePatch);
-    }
+    private readonly PatchManager _patchManager = new();
+    private DialogueStartPatch? _dialoguePatch;
+    private ChibiMitaDialogueFix? _chibiMitaDialogueFixer;
 
     public override bool IsEnabled
     {
@@ -66,16 +63,31 @@ public sealed class DialogueSkipper : BaseMod
 
     protected override void OnEnable()
     {
+        OnDisable();
+
+        _dialoguePatch = new();
+        _patchManager.RegisterPatch(_dialoguePatch);
+        _patchManager.RegisterPatch<RingInstantReadyPatch>();
+
+        _chibiMitaDialogueFixer = new(_dialoguePatch);
+
         KappiCore.Loader.SceneWasLoaded += OnSceneWasLoaded;
+
         SubscribeEvents();
-        _chibiMitaDialogueFixer.Init();
     }
 
     protected override void OnDisable()
     {
-        KappiCore.Loader.SceneWasLoaded -= OnSceneWasLoaded;
         UnsubscribeEvents();
-        _chibiMitaDialogueFixer.CleanUp();
+
+        KappiCore.Loader.SceneWasLoaded -= OnSceneWasLoaded;
+
+        _chibiMitaDialogueFixer?.Dispose();
+        _chibiMitaDialogueFixer = null;
+
+        _patchManager.Dispose();
+
+        _dialoguePatch = null;
     }
 
     private static void OnSceneWasLoaded(int buildIndex, string sceneName)
@@ -92,12 +104,18 @@ public sealed class DialogueSkipper : BaseMod
 
     private void SubscribeEvents()
     {
-        _dialoguePatch.OnPostfixDialogueStart += HandleDialogueSkip;
+        if (_dialoguePatch is not null)
+        {
+            _dialoguePatch.OnPostfixDialogueStart += HandleDialogueSkip;
+        }
     }
 
     private void UnsubscribeEvents()
     {
-        _dialoguePatch.OnPostfixDialogueStart -= HandleDialogueSkip;
+        if (_dialoguePatch is not null)
+        {
+            _dialoguePatch.OnPostfixDialogueStart -= HandleDialogueSkip;
+        }
     }
 
     private void HandleDialogueSkip(object? sender, DialogueEventArgs args)

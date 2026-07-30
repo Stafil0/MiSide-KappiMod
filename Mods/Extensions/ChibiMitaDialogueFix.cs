@@ -14,27 +14,16 @@ using BepInEx.IL2CPP;
 
 namespace KappiMod.Mods.Extensions;
 
-internal class ChibiMitaDialogueFix
+internal class ChibiMitaDialogueFix : IDisposable
 {
     private const string BROKEN_DIALOGUE = "3D TextFactory 5";
 
     private readonly DialogueStartPatch _dialoguePatch;
-
-    private bool _isInitialized = false;
     private Mob_ChibiMita? _cachedChibiMita;
 
     internal ChibiMitaDialogueFix(DialogueStartPatch dialoguePatch)
     {
         _dialoguePatch = dialoguePatch;
-    }
-
-    internal void Init()
-    {
-        if (_isInitialized)
-        {
-            KappiLogger.LogError($"{nameof(ChibiMitaDialogueFix)} is already initialized");
-            return;
-        }
 
         if (SceneManager.GetActiveScene().name is SceneName.CHIBIMITA)
         {
@@ -48,24 +37,14 @@ internal class ChibiMitaDialogueFix
         KappiCore.Loader.SceneWasInitialized += OnSceneWasInitialized;
         _dialoguePatch.OnPostfixDialogueStart += HandleDialogue;
 
-        _isInitialized = true;
         KappiLogger.Log("Initialized");
     }
 
-    internal void CleanUp()
+    public void Dispose()
     {
-        if (!_isInitialized)
-        {
-            KappiLogger.LogError($"{nameof(ChibiMitaDialogueFix)} is not initialized");
-            return;
-        }
-
-        _cachedChibiMita = null;
-
         KappiCore.Loader.SceneWasInitialized -= OnSceneWasInitialized;
         _dialoguePatch.OnPostfixDialogueStart -= HandleDialogue;
 
-        _isInitialized = false;
         KappiLogger.Log("Cleaned up");
     }
 

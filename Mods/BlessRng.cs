@@ -9,7 +9,7 @@ namespace KappiMod.Mods;
 [ModInfo(
     name: "BlessRng Mod",
     description: "Removes RNG from the game",
-    version: "1.2.0",
+    version: "1.3.0",
     author: BuildInfo.COMPANY
 )]
 public sealed class BlessRng : BaseMod
@@ -44,7 +44,6 @@ public sealed class BlessRng : BaseMod
         _patchManager.RegisterPatch<ChipMiniGamePatch>();
         _patchManager.RegisterPatch<FixedItemSpawnPatch>();
         _patchManager.RegisterPatch<PassableDummiesPatch>();
-        _patchManager.RegisterPatch<RingInstantReadyPatch>();
         _patchManager.RegisterPatch<LoopClockPatch>();
         _patchManager.RegisterPatch<MilaMinigame1Patch>();
         _patchManager.RegisterPatch<MilaMinigame2Patch>();
