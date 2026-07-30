@@ -14,18 +14,6 @@ public sealed class RandomPatch : IPatch
     public static bool IsInitialized => _source is not null && _harmony is not null;
 
     private static IRandom? _source;
-    private static IRandom Source
-    {
-        get
-        {
-            if (_source is null)
-            {
-                throw new InvalidOperationException($"{nameof(RandomPatch)} is not initialized.");
-            }
-
-            return _source;
-        }
-    }
 
     private static HarmonyLib.Harmony? _harmony;
 
@@ -83,12 +71,13 @@ public sealed class RandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.value), MethodType.Getter)]
     private static bool Value(ref float __result)
     {
-        if (!Source.Enabled)
+        IRandom? src = _source;
+        if (src is null || !src.Enabled)
         {
             return true;
         }
 
-        __result = Source.Value();
+        __result = src.Value();
         return false;
     }
 
@@ -100,12 +89,13 @@ public sealed class RandomPatch : IPatch
     )]
     private static bool InsideUnitSphere(ref Vector3 __result)
     {
-        if (!Source.Enabled)
+        IRandom? src = _source;
+        if (src is null || !src.Enabled)
         {
             return true;
         }
 
-        __result = Source.InsideUnitSphere();
+        __result = src.InsideUnitSphere();
         return false;
     }
 
@@ -117,12 +107,13 @@ public sealed class RandomPatch : IPatch
     )]
     private static bool InsideUnitCircle(ref Vector2 __result)
     {
-        if (!Source.Enabled)
+        IRandom? src = _source;
+        if (src is null || !src.Enabled)
         {
             return true;
         }
 
-        __result = Source.InsideUnitCircle();
+        __result = src.InsideUnitCircle();
         return false;
     }
 
@@ -134,12 +125,13 @@ public sealed class RandomPatch : IPatch
     )]
     private static bool OnUnitSphere(ref Vector3 __result)
     {
-        if (!Source.Enabled)
+        IRandom? src = _source;
+        if (src is null || !src.Enabled)
         {
             return true;
         }
 
-        __result = Source.OnUnitSphere();
+        __result = src.OnUnitSphere();
         return false;
     }
 
@@ -151,12 +143,13 @@ public sealed class RandomPatch : IPatch
     )]
     private static bool Rotation(ref Quaternion __result)
     {
-        if (!Source.Enabled)
+        IRandom? src = _source;
+        if (src is null || !src.Enabled)
         {
             return true;
         }
 
-        __result = Source.Rotation();
+        __result = src.Rotation();
         return false;
     }
 
@@ -168,12 +161,13 @@ public sealed class RandomPatch : IPatch
     )]
     private static bool RotationUniform(ref Quaternion __result)
     {
-        if (!Source.Enabled)
+        IRandom? src = _source;
+        if (src is null || !src.Enabled)
         {
             return true;
         }
 
-        __result = Source.RotationUniform();
+        __result = src.RotationUniform();
         return false;
     }
 
@@ -189,12 +183,13 @@ public sealed class RandomPatch : IPatch
     )]
     private static bool RangeFloat(float minInclusive, float maxInclusive, ref float __result)
     {
-        if (!Source.Enabled)
+        IRandom? src = _source;
+        if (src is null || !src.Enabled)
         {
             return true;
         }
 
-        __result = Source.RangeFloat(minInclusive, maxInclusive);
+        __result = src.RangeFloat(minInclusive, maxInclusive);
         return false;
     }
 
@@ -206,12 +201,13 @@ public sealed class RandomPatch : IPatch
     )]
     private static bool RangeInt(int minInclusive, int maxExclusive, ref int __result)
     {
-        if (!Source.Enabled)
+        IRandom? src = _source;
+        if (src is null || !src.Enabled)
         {
             return true;
         }
 
-        __result = Source.RangeInt(minInclusive, maxExclusive);
+        __result = src.RangeInt(minInclusive, maxExclusive);
         return false;
     }
 
@@ -219,13 +215,14 @@ public sealed class RandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.GetRandomUnitCircle))]
     private static bool GetRandomUnitCircle(out Vector2 output)
     {
-        if (!Source.Enabled)
+        IRandom? src = _source;
+        if (src is null || !src.Enabled)
         {
             output = Vector2.zero;
             return true;
         }
 
-        output = Source.GetRandomUnitCircle();
+        output = src.GetRandomUnitCircle();
         return false;
     }
 
@@ -233,12 +230,13 @@ public sealed class RandomPatch : IPatch
     [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.InitState))]
     private static void InitState(int seed)
     {
-        if (!Source.Enabled)
+        IRandom? src = _source;
+        if (src is null || !src.Enabled)
         {
             return;
         }
 
-        Source.ForcedSeed = seed;
+        src.ForcedSeed = seed;
     }
 
     #endregion Methods Patches
