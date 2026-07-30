@@ -15,7 +15,7 @@ using DialogueSceneMappings = Dictionary<string, Dictionary<string, int>>;
 [ModInfo(
     name: "Dialogue Skipper",
     description: "Skip certain dialogue sections in the game",
-    version: "1.2.0",
+    version: "1.3.0",
     author: BuildInfo.COMPANY
 )]
 public sealed class DialogueSkipper : BaseMod
@@ -113,14 +113,15 @@ public sealed class DialogueSkipper : BaseMod
     }
 
     private bool IsDialogueIgnored(DialogueEventArgs args) =>
-        _ignoredDialogues.ContainsKey(args.SceneName) &&
-        _ignoredDialogues[args.SceneName].ContainsKey(args.ObjectName) &&
-        _ignoredDialogues[args.SceneName][args.ObjectName] == args.IndexString;
+        _ignoredDialogues.ContainsKey(args.SceneName)
+        && _ignoredDialogues[args.SceneName].ContainsKey(args.ObjectName)
+        && _ignoredDialogues[args.SceneName][args.ObjectName] == args.IndexString;
 
     private static void LogDialogueInfo(
         DialogueEventArgs args,
         char separator = '-',
-        bool isWarning = false)
+        bool isWarning = false
+    )
     {
         if (string.IsNullOrWhiteSpace(args.Text))
         {

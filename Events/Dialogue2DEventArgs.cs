@@ -20,7 +20,8 @@ public sealed class Dialogue2DEventArgs : DialogueEventArgs
         string text,
         GameObject? speaker,
         DialoguePatchType patchType,
-        Location18_Novella novella)
+        Location18_Novella novella
+    )
         : base(objectName, sceneName, indexString, text, speaker, patchType)
     {
         Novella = novella;
@@ -28,7 +29,8 @@ public sealed class Dialogue2DEventArgs : DialogueEventArgs
 
     public static Dialogue2DEventArgs Create(
         Location18_Novella novella,
-        DialoguePatchType patchType)
+        DialoguePatchType patchType
+    )
     {
         string objectName = !UnityHelpers.IsNullOrDestroyed(novella.dialoguePlay)
             ? novella.dialoguePlay.name
@@ -41,7 +43,8 @@ public sealed class Dialogue2DEventArgs : DialogueEventArgs
             novella.textNeed ?? string.Empty,
             speaker: null,
             patchType,
-            novella);
+            novella
+        );
     }
 
     public override void Skip()
