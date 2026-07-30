@@ -44,19 +44,25 @@ public sealed class DialogueStartPatch : IPatch
     {
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Dialogue_3DText), nameof(Dialogue_3DText.Start))]
-        private static void OnDialogueStartPrefix(Dialogue_3DText __instance) => Raise3DDialogue(__instance, DialoguePatchType.Prefix);
+        private static void OnDialogueStartPrefix(Dialogue_3DText __instance) =>
+            Raise3DDialogue(__instance, DialoguePatchType.Prefix);
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Dialogue_3DText), nameof(Dialogue_3DText.Start))]
-        private static void OnDialogueStartPostfix(Dialogue_3DText __instance) => Raise3DDialogue(__instance, DialoguePatchType.Postfix);
+        private static void OnDialogueStartPostfix(Dialogue_3DText __instance) =>
+            Raise3DDialogue(__instance, DialoguePatchType.Postfix);
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Location18_Novella), "Update")]
         private static void OnNovellaUpdatePostfix(Location18_Novella __instance)
         {
-            if (UnityHelpers.IsNullOrDestroyed(__instance) ||
-                !__instance.controllDialogue ||
-                !(__instance.playPrint || __instance is { dialogueShow: true, timeWasObject: 0f }))
+            if (
+                __instance.IsNullOrDestroyed()
+                || !__instance.controllDialogue
+                || !(
+                    __instance.playPrint || __instance is { dialogueShow: true, timeWasObject: 0f }
+                )
+            )
             {
                 return;
             }
@@ -68,8 +74,10 @@ public sealed class DialogueStartPatch : IPatch
         [HarmonyPatch(typeof(Location18_TicTacToe), "Update")]
         private static void OnTicTacToeUpdatePostfix(Location18_TicTacToe __instance)
         {
-            if (UnityHelpers.IsNullOrDestroyed(__instance) ||
-                !(__instance.timeDialogueNext > 0f || __instance.waitClick))
+            if (
+                __instance.IsNullOrDestroyed()
+                || !(__instance.timeDialogueNext > 0f || __instance.waitClick)
+            )
             {
                 return;
             }
@@ -79,7 +87,7 @@ public sealed class DialogueStartPatch : IPatch
 
         private static void Raise3DDialogue(Dialogue_3DText dialogue, DialoguePatchType patchType)
         {
-            if (UnityHelpers.IsNullOrDestroyed(dialogue))
+            if (dialogue.IsNullOrDestroyed())
             {
                 return;
             }
@@ -105,7 +113,7 @@ public sealed class DialogueStartPatch : IPatch
 
         private static void RaiseNovellaDialogue(Location18_Novella novella)
         {
-            if (UnityHelpers.IsNullOrDestroyed(novella))
+            if (novella.IsNullOrDestroyed())
             {
                 return;
             }
@@ -117,15 +125,13 @@ public sealed class DialogueStartPatch : IPatch
             }
             catch (Exception ex)
             {
-                KappiLogger.LogException(
-                    "Failed to process novella dialogue event",
-                    exception: ex);
+                KappiLogger.LogException("Failed to process novella dialogue event", exception: ex);
             }
         }
 
         private static void RaiseTicTacToeDialogue(Location18_TicTacToe ticTacToe)
         {
-            if (UnityHelpers.IsNullOrDestroyed(ticTacToe))
+            if (ticTacToe.IsNullOrDestroyed())
             {
                 return;
             }
@@ -139,7 +145,8 @@ public sealed class DialogueStartPatch : IPatch
             {
                 KappiLogger.LogException(
                     "Failed to process tic-tac-toe dialogue event",
-                    exception: ex);
+                    exception: ex
+                );
             }
         }
     }

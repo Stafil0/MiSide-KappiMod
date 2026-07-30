@@ -98,7 +98,7 @@ internal sealed class ChibiDoorUnlockerPatch : IPatch
 
     private static bool TryFindDoor()
     {
-        if (!UnityHelpers.IsNullOrDestroyed(_cachedDoor))
+        if (!_cachedDoor.IsNullOrDestroyed())
         {
             return true;
         }
@@ -108,6 +108,6 @@ internal sealed class ChibiDoorUnlockerPatch : IPatch
             ?.Find(DOOR_PATH)
             ?.gameObject?.GetComponent<ObjectDoor>();
 
-        return !UnityHelpers.IsNullOrDestroyed(_cachedDoor);
+        return !_cachedDoor.IsNullOrDestroyed();
     }
 }

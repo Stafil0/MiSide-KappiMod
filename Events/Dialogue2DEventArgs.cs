@@ -32,7 +32,7 @@ public sealed class Dialogue2DEventArgs : DialogueEventArgs
         DialoguePatchType patchType
     )
     {
-        string objectName = !UnityHelpers.IsNullOrDestroyed(novella.dialoguePlay)
+        string objectName = !novella.dialoguePlay.IsNullOrDestroyed()
             ? novella.dialoguePlay.name
             : novella.name;
 
@@ -49,7 +49,7 @@ public sealed class Dialogue2DEventArgs : DialogueEventArgs
 
     public override void Skip()
     {
-        if (UnityHelpers.IsNullOrDestroyed(Novella) || !Novella.controllDialogue)
+        if (Novella.IsNullOrDestroyed() || !Novella.controllDialogue)
         {
             return;
         }

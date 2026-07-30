@@ -138,13 +138,13 @@ public sealed class FlashlightIncreaser : BaseMod
 
     private bool TryFindWorldPlayer()
     {
-        if (!UnityHelpers.IsNullOrDestroyed(_cachedWorldPlayer))
+        if (!_cachedWorldPlayer.IsNullOrDestroyed())
         {
             return true;
         }
 
         _cachedWorldPlayer = GameObject.Find("World")?.GetComponent<WorldPlayer>();
-        return !UnityHelpers.IsNullOrDestroyed(_cachedWorldPlayer);
+        return !_cachedWorldPlayer.IsNullOrDestroyed();
     }
 
     private void ResetState()
