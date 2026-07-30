@@ -35,11 +35,11 @@ internal sealed class MilaMinigame4Patch : IPatch
     [HarmonyPatch(typeof(Location19_Game4), "RestartWorld")]
     private static void BeforeGame4Restart(out RandomState __state)
     {
-        __state = DeterministicRandomPatch.GetState();
+        __state = RandomPatch.GetState();
 
         try
         {
-            DeterministicRandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
+            RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
         {
@@ -53,7 +53,7 @@ internal sealed class MilaMinigame4Patch : IPatch
     {
         try
         {
-            DeterministicRandomPatch.SetState(__state);
+            RandomPatch.SetState(__state);
 
             SnapGame4WallsToSides(__instance);
 
@@ -69,11 +69,11 @@ internal sealed class MilaMinigame4Patch : IPatch
     [HarmonyPatch(typeof(Location19_Game4), "Update")]
     private static void BeforeGame4Update(out RandomState __state)
     {
-        __state = DeterministicRandomPatch.GetState();
+        __state = RandomPatch.GetState();
 
         try
         {
-            DeterministicRandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
+            RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
         {
@@ -87,7 +87,7 @@ internal sealed class MilaMinigame4Patch : IPatch
     {
         try
         {
-            DeterministicRandomPatch.SetState(__state);
+            RandomPatch.SetState(__state);
         }
         catch (Exception ex)
         {

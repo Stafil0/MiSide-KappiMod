@@ -2,32 +2,8 @@ using UnityEngine;
 
 namespace KappiMod.Patches.Rng;
 
-public struct RandomState
+public class CustomRandom : IRandom
 {
-    public bool? Enabled;
-    public int? ForcedSeed;
-    public bool? ForceZeroRandom;
-}
-
-public class DeterministicRandom
-{
-    private System.Random _random;
-
-    public DeterministicRandom(
-        bool enabled = false,
-        int forcedSeed = 12345,
-        bool forceZeroRandom = false
-    )
-    {
-        Enabled = enabled;
-        _forcedSeed = forcedSeed;
-        ForceZeroRandom = forceZeroRandom;
-        _random = new System.Random(_forcedSeed);
-    }
-
-    public DeterministicRandom(DeterministicRandom from)
-        : this(from.Enabled, from.ForcedSeed, from.ForceZeroRandom) { }
-
     public bool Enabled { get; set; }
 
     private int _forcedSeed;
@@ -42,6 +18,19 @@ public class DeterministicRandom
     }
 
     public bool ForceZeroRandom { get; set; }
+
+    private System.Random _random;
+
+    public CustomRandom(bool enabled = false, int forcedSeed = 12345, bool forceZeroRandom = false)
+    {
+        Enabled = enabled;
+        _forcedSeed = forcedSeed;
+        ForceZeroRandom = forceZeroRandom;
+        _random = new System.Random(_forcedSeed);
+    }
+
+    public CustomRandom(IRandom from)
+        : this(from.Enabled, from.ForcedSeed, from.ForceZeroRandom) { }
 
     public RandomState GetState() =>
         new()

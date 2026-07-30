@@ -37,11 +37,11 @@ internal sealed class PCGamesPatch : IPatch
     [HarmonyPatch(typeof(Location14_PCGames), nameof(Location14_PCGames.OpenFilesGame))]
     private static void BeforeOpenFilesGame(out RandomState __state)
     {
-        __state = DeterministicRandomPatch.GetState();
+        __state = RandomPatch.GetState();
 
         try
         {
-            DeterministicRandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
+            RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
         {
@@ -55,7 +55,7 @@ internal sealed class PCGamesPatch : IPatch
     {
         try
         {
-            DeterministicRandomPatch.SetState(__state);
+            RandomPatch.SetState(__state);
 
             EventManager.ShowEvent(new($"{nameof(BlessRng)}: PC files puzzle solved"));
         }
@@ -69,11 +69,11 @@ internal sealed class PCGamesPatch : IPatch
     [HarmonyPatch(typeof(Location14_PCGames), nameof(Location14_PCGames.OpenTreeGame))]
     private static void BeforeOpenTreeGame(out RandomState __state)
     {
-        __state = DeterministicRandomPatch.GetState();
+        __state = RandomPatch.GetState();
 
         try
         {
-            DeterministicRandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
+            RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
         {
@@ -87,7 +87,7 @@ internal sealed class PCGamesPatch : IPatch
     {
         try
         {
-            DeterministicRandomPatch.SetState(__state);
+            RandomPatch.SetState(__state);
 
             EventManager.ShowEvent(new($"{nameof(BlessRng)}: PC slider puzzle solved"));
         }

@@ -20,7 +20,7 @@ internal sealed class ArenaBombPatch : IPatch
     public string Description =>
         "Run & Hide bombs: fixed music and eye timers";
 
-    private static DeterministicRandom? _previous;
+    private static IRandom? _previous;
 
     private readonly HarmonyLib.Harmony _harmony;
 
@@ -70,9 +70,9 @@ internal sealed class ArenaBombPatch : IPatch
         _previous ??= previous;
     }
 
-    private static DeterministicRandom ChangeRandomSource(int phase)
+    private static IRandom ChangeRandomSource(int phase)
     {
-        var previous = DeterministicRandomPatch.GetSource();
+        var previous = RandomPatch.GetSource();
 
         if (previous is ArenaBombRandom bomb && bomb.Phase == phase && bomb.Enabled)
         {
@@ -83,7 +83,7 @@ internal sealed class ArenaBombPatch : IPatch
         {
             var next = new ArenaBombRandom(previous, phase);
             next.SetState(new() { Enabled = true, ForceZeroRandom = false });
-            DeterministicRandomPatch.SetSource(next);
+            RandomPatch.SetSource(next);
         }
         catch (Exception ex)
         {
@@ -102,7 +102,7 @@ internal sealed class ArenaBombPatch : IPatch
 
         try
         {
-            DeterministicRandomPatch.SetSource(_previous);
+            RandomPatch.SetSource(_previous);
         }
         catch (Exception ex)
         {
@@ -113,11 +113,11 @@ internal sealed class ArenaBombPatch : IPatch
     }
 }
 
-internal sealed class ArenaBombRandom : DeterministicRandom
+internal sealed class ArenaBombRandom : CustomRandom
 {
     public int Phase { get; }
 
-    public ArenaBombRandom(DeterministicRandom from, int phase)
+    public ArenaBombRandom(IRandom from, int phase)
         : base(from)
     {
         Phase = phase;

@@ -40,11 +40,11 @@ internal sealed class MilaMinigame2Patch : IPatch
     [HarmonyPatch(typeof(Location19_Game2), "Start")]
     private static void BeforeGame2Start(out RandomState __state)
     {
-        __state = DeterministicRandomPatch.GetState();
+        __state = RandomPatch.GetState();
 
         try
         {
-            DeterministicRandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
+            RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
         {
@@ -58,7 +58,7 @@ internal sealed class MilaMinigame2Patch : IPatch
     {
         try
         {
-            DeterministicRandomPatch.SetState(__state);
+            RandomPatch.SetState(__state);
 
             ApplyGame2ZigzagLayout(__instance);
 

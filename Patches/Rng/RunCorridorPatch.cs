@@ -16,8 +16,7 @@ internal sealed class RunCorridorPatch : IPatch
 {
     public string Id => "com.kappimod.runcorridor";
     public string Name => "Run Corridor Patch";
-    public string Description =>
-        "Run & Hide corridor: straight paths only";
+    public string Description => "Run & Hide corridor: straight paths only";
 
     private readonly HarmonyLib.Harmony _harmony;
 
@@ -34,11 +33,11 @@ internal sealed class RunCorridorPatch : IPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
-    private static void BeforeStart(out DeterministicRandom __state) => __state = ChangeRandomSource();
+    private static void BeforeStart(out IRandom __state) => __state = ChangeRandomSource();
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
-    private static void AfterStart(DeterministicRandom __state)
+    private static void AfterStart(IRandom __state)
     {
         RestoreRandomSource(__state);
 
@@ -54,21 +53,22 @@ internal sealed class RunCorridorPatch : IPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
-    private static void BeforeCreateGeneration(out DeterministicRandom __state) => __state = ChangeRandomSource();
+    private static void BeforeCreateGeneration(out IRandom __state) =>
+        __state = ChangeRandomSource();
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
-    private static void AfterCreateGeneration(DeterministicRandom __state) => RestoreRandomSource(__state);
+    private static void AfterCreateGeneration(IRandom __state) => RestoreRandomSource(__state);
 
-    private static DeterministicRandom ChangeRandomSource()
+    private static IRandom ChangeRandomSource()
     {
-        var previous = DeterministicRandomPatch.GetSource();
+        var previous = RandomPatch.GetSource();
 
         try
         {
             var next = new CorridorRandom(previous);
             next.SetState(new() { Enabled = true, ForceZeroRandom = true });
-            DeterministicRandomPatch.SetSource(next);
+            RandomPatch.SetSource(next);
         }
         catch (Exception ex)
         {
@@ -78,11 +78,11 @@ internal sealed class RunCorridorPatch : IPatch
         return previous;
     }
 
-    private static void RestoreRandomSource(DeterministicRandom previous)
+    private static void RestoreRandomSource(IRandom previous)
     {
         try
         {
-            DeterministicRandomPatch.SetSource(previous);
+            RandomPatch.SetSource(previous);
         }
         catch (Exception ex)
         {
@@ -91,9 +91,9 @@ internal sealed class RunCorridorPatch : IPatch
     }
 }
 
-internal sealed class CorridorRandom : DeterministicRandom
+internal sealed class CorridorRandom : CustomRandom
 {
-    public CorridorRandom(DeterministicRandom from)
+    public CorridorRandom(IRandom from)
         : base(from) { }
 
     public override int RangeInt(int minInclusive, int maxExclusive)
