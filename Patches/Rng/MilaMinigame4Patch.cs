@@ -17,7 +17,8 @@ internal sealed class MilaMinigame4Patch : IPatch
 {
     public string Id => "com.kappimod.milaminigame4";
     public string Name => "Mila Minigame 4 Patch";
-    public string Description => "Mila invaders mini-game: walls aligned in a single line on the sides";
+    public string Description =>
+        "Mila invaders mini-game: walls aligned in a single line on the sides";
 
     private const float WallXMax = 0.4f;
 
@@ -32,13 +33,13 @@ internal sealed class MilaMinigame4Patch : IPatch
     public void Dispose() => _harmony.UnpatchSelf();
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location19_Game4), "RestartWorld")]
+    [HarmonyPatch(typeof(Location19_Game4), nameof(Location19_Game4.RestartWorld))]
     private static void BeforeGame4Restart(out RandomState __state)
     {
-        __state = RandomPatch.GetState();
-
+        __state = new();
         try
         {
+            __state = RandomPatch.GetState();
             RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
@@ -48,7 +49,7 @@ internal sealed class MilaMinigame4Patch : IPatch
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location19_Game4), "RestartWorld")]
+    [HarmonyPatch(typeof(Location19_Game4), nameof(Location19_Game4.RestartWorld))]
     private static void AfterGame4Restart(Location19_Game4 __instance, RandomState __state)
     {
         try
@@ -57,7 +58,9 @@ internal sealed class MilaMinigame4Patch : IPatch
 
             SnapGame4WallsToSides(__instance);
 
-            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Mila Game 4: walls aligned in a single line on the sides"));
+            EventManager.ShowEvent(
+                new($"{nameof(BlessRng)}: Mila Game 4: walls aligned in a single line on the sides")
+            );
         }
         catch (Exception ex)
         {
@@ -66,13 +69,13 @@ internal sealed class MilaMinigame4Patch : IPatch
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location19_Game4), "Update")]
+    [HarmonyPatch(typeof(Location19_Game4), nameof(Location19_Game4.Update))]
     private static void BeforeGame4Update(out RandomState __state)
     {
-        __state = RandomPatch.GetState();
-
+        __state = new();
         try
         {
+            __state = RandomPatch.GetState();
             RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
@@ -82,7 +85,7 @@ internal sealed class MilaMinigame4Patch : IPatch
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location19_Game4), "Update")]
+    [HarmonyPatch(typeof(Location19_Game4), nameof(Location19_Game4.Update))]
     private static void AfterGame4Update(RandomState __state)
     {
         try

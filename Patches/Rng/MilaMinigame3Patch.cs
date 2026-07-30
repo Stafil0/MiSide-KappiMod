@@ -29,13 +29,13 @@ internal sealed class MilaMinigame3Patch : IPatch
     public void Dispose() => _harmony.UnpatchSelf();
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location19_Game3), "Start")]
+    [HarmonyPatch(typeof(Location19_Game3), nameof(Location19_Game3.Start))]
     private static void BeforeGame3Start(out RandomState __state)
     {
-        __state = RandomPatch.GetState();
-
+        __state = new();
         try
         {
+            __state = RandomPatch.GetState();
             RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
@@ -45,7 +45,7 @@ internal sealed class MilaMinigame3Patch : IPatch
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location19_Game3), "Start")]
+    [HarmonyPatch(typeof(Location19_Game3), nameof(Location19_Game3.Start))]
     private static void AfterGame3Start(RandomState __state)
     {
         try

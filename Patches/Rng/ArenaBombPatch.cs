@@ -17,8 +17,7 @@ internal sealed class ArenaBombPatch : IPatch
 {
     public string Id => "com.kappimod.arenabomb";
     public string Name => "Arena Bomb Patch";
-    public string Description =>
-        "Run & Hide bombs: fixed music and eye timers";
+    public string Description => "Run & Hide bombs: fixed music and eye timers";
 
     private static IRandom? _previous;
 
@@ -40,34 +39,57 @@ internal sealed class ArenaBombPatch : IPatch
     [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.PlayPhase))]
     private static void BeforePlayPhase(int x)
     {
-        if (x is not (1 or 2))
+        try
         {
-            RestoreRandomSource();
-            return;
-        }
+            if (x is not (1 or 2))
+            {
+                RestoreRandomSource();
+                return;
+            }
 
-        var previous = ChangeRandomSource(x);
-        _previous ??= previous;
+            var previous = ChangeRandomSource(x);
+            _previous ??= previous;
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException($"Failed in {nameof(ArenaBombPatch)}", exception: ex);
+        }
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.PlayPhase))]
     private static void AfterPlayPhase(int x)
     {
-        if (x is not (1 or 2))
+        try
         {
-            return;
-        }
+            if (x is not (1 or 2))
+            {
+                return;
+            }
 
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: Run & Hide bombs: fixed music and eye timers"));
+            EventManager.ShowEvent(
+                new($"{nameof(BlessRng)}: Run & Hide bombs: fixed music and eye timers")
+            );
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException($"Failed in {nameof(ArenaBombPatch)}", exception: ex);
+        }
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.MitaSwitchRecorder))]
     private static void BeforeSwitchRecorder()
     {
-        var previous = ChangeRandomSource(phase: 1);
-        _previous ??= previous;
+        try
+        {
+            var previous = ChangeRandomSource(phase: 1);
+            _previous ??= previous;
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException($"Failed in {nameof(ArenaBombPatch)}", exception: ex);
+        }
     }
 
     private static IRandom ChangeRandomSource(int phase)

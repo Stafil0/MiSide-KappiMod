@@ -32,11 +32,11 @@ internal sealed class RunCorridorPatch : IPatch
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
+    [HarmonyPatch(typeof(Location20_RunCorridor), nameof(Location20_RunCorridor.Start))]
     private static void BeforeStart(out IRandom __state) => __state = ChangeRandomSource();
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
+    [HarmonyPatch(typeof(Location20_RunCorridor), nameof(Location20_RunCorridor.Start))]
     private static void AfterStart(IRandom __state)
     {
         RestoreRandomSource(__state);
@@ -52,12 +52,12 @@ internal sealed class RunCorridorPatch : IPatch
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
+    [HarmonyPatch(typeof(Location20_RunCorridor), nameof(Location20_RunCorridor.CreateGeneration))]
     private static void BeforeCreateGeneration(out IRandom __state) =>
         __state = ChangeRandomSource();
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
+    [HarmonyPatch(typeof(Location20_RunCorridor), nameof(Location20_RunCorridor.CreateGeneration))]
     private static void AfterCreateGeneration(IRandom __state) => RestoreRandomSource(__state);
 
     private static IRandom ChangeRandomSource()

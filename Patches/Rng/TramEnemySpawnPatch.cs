@@ -29,13 +29,13 @@ internal sealed class TramEnemySpawnPatch : IPatch
     public void Dispose() => _harmony.UnpatchSelf();
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location11_Lift), "CreateEnemy")]
+    [HarmonyPatch(typeof(Location11_Lift), nameof(Location11_Lift.CreateEnemy))]
     private static void BeforeCreateEnemy(out RandomState __state)
     {
-        __state = RandomPatch.GetState();
-
+        __state = new();
         try
         {
+            __state = RandomPatch.GetState();
             RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
@@ -45,7 +45,7 @@ internal sealed class TramEnemySpawnPatch : IPatch
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location11_Lift), "CreateEnemy")]
+    [HarmonyPatch(typeof(Location11_Lift), nameof(Location11_Lift.CreateEnemy))]
     private static void AfterCreateEnemy(RandomState __state)
     {
         try

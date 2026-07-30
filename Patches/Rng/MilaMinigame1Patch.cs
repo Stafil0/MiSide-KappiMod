@@ -29,7 +29,7 @@ internal sealed class MilaMinigame1Patch : IPatch
     public void Dispose() => _harmony.UnpatchSelf();
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location19_Game1), "PointsRandom")]
+    [HarmonyPatch(typeof(Location19_Game1), nameof(Location19_Game1.PointsRandom))]
     private static void LockGame1ShotCurve(Location19_Game1 __instance)
     {
         try

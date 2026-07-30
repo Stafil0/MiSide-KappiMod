@@ -37,13 +37,13 @@ internal sealed class MilaMinigame2Patch : IPatch
     public void Dispose() => _harmony.UnpatchSelf();
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location19_Game2), "Start")]
+    [HarmonyPatch(typeof(Location19_Game2), nameof(Location19_Game2.Start))]
     private static void BeforeGame2Start(out RandomState __state)
     {
-        __state = RandomPatch.GetState();
-
+        __state = new();
         try
         {
+            __state = RandomPatch.GetState();
             RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
@@ -53,7 +53,7 @@ internal sealed class MilaMinigame2Patch : IPatch
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location19_Game2), "Start")]
+    [HarmonyPatch(typeof(Location19_Game2), nameof(Location19_Game2.Start))]
     private static void AfterGame2Start(Location19_Game2 __instance, RandomState __state)
     {
         try
@@ -120,12 +120,15 @@ internal sealed class MilaMinigame2Patch : IPatch
             pathLen += step;
         }
 
-        var last = points[points.Count - 1]?.point;
-        var endToEnd = last != null
-            ? Vector3.Distance(anchor.transform.position, last.transform.position)
-            : 0f;
+        var last = points[^1]?.point;
+        var endToEnd =
+            last != null
+                ? Vector3.Distance(anchor.transform.position, last.transform.position)
+                : 0f;
 
-        KappiLogger.Log($"[Game 2] zigzag {points.Count} towers, pathLen={pathLen:F3}, endToEnd={endToEnd:F3}, catchRadius={MinCatchRadius}, stepMult={MinStepMult}");
+        KappiLogger.Log(
+            $"[Game 2] zigzag {points.Count} towers, pathLen={pathLen:F3}, endToEnd={endToEnd:F3}, catchRadius={MinCatchRadius}, stepMult={MinStepMult}"
+        );
     }
 
     private static void ApplyCatchRadius(Location19_Game2_Point entry, float catchRadius)

@@ -37,10 +37,10 @@ internal sealed class PCGamesPatch : IPatch
     [HarmonyPatch(typeof(Location14_PCGames), nameof(Location14_PCGames.OpenFilesGame))]
     private static void BeforeOpenFilesGame(out RandomState __state)
     {
-        __state = RandomPatch.GetState();
-
+        __state = new();
         try
         {
+            __state = RandomPatch.GetState();
             RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
@@ -69,10 +69,10 @@ internal sealed class PCGamesPatch : IPatch
     [HarmonyPatch(typeof(Location14_PCGames), nameof(Location14_PCGames.OpenTreeGame))]
     private static void BeforeOpenTreeGame(out RandomState __state)
     {
-        __state = RandomPatch.GetState();
-
+        __state = new();
         try
         {
+            __state = RandomPatch.GetState();
             RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
         }
         catch (Exception ex)
