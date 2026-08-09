@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 #if ML
 using Il2Cpp;
 #elif BIE
@@ -33,7 +32,8 @@ public sealed class Dialogue3DEventArgs : DialogueEventArgs
         new(
             instance,
             instance.name,
-            SceneManager.GetActiveScene().name,
+            // Object scene — GetActiveScene() is wrong with additive chapter loads.
+            instance.gameObject.scene.name,
             instance.indexString,
             instance.textPrint,
             instance.speaker,
