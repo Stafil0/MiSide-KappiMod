@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UniverseLib.Utility;
 #if ML
 using Il2Cpp;
@@ -40,7 +39,7 @@ public sealed class DialogueTicTacToeEventArgs : DialogueEventArgs
 
         return new(
             objectName,
-            SceneManager.GetActiveScene().name,
+            ticTacToe.gameObject.scene.name,
             novella?.indexStringDialogue ?? 0,
             novella?.textNeed ?? string.Empty,
             speaker: null,
