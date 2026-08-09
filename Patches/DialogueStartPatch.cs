@@ -91,7 +91,7 @@ public sealed class DialogueStartPatch : IPatch
 
         try
         {
-            var args = DialogueTTTEventArgs.Create(ticTacToe, DialoguePatchType.Postfix);
+            var args = DialogueTicTacToeEventArgs.Create(ticTacToe, DialoguePatchType.Postfix);
             _instance?.OnPostfixDialogueStart?.Invoke(_instance, args);
         }
         catch (Exception ex)

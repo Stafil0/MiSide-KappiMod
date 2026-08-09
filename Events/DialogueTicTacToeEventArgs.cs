@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UniverseLib.Utility;
 #if ML
 using Il2Cpp;
@@ -9,11 +8,11 @@ using BepInEx.IL2CPP;
 
 namespace KappiMod.Events;
 
-public sealed class DialogueTTTEventArgs : DialogueEventArgs
+public sealed class DialogueTicTacToeEventArgs : DialogueEventArgs
 {
     private readonly Location18_TicTacToe TicTacToe;
 
-    private DialogueTTTEventArgs(
+    private DialogueTicTacToeEventArgs(
         string objectName,
         string sceneName,
         int indexString,
@@ -27,7 +26,7 @@ public sealed class DialogueTTTEventArgs : DialogueEventArgs
         TicTacToe = ticTacToe;
     }
 
-    public static DialogueTTTEventArgs Create(
+    public static DialogueTicTacToeEventArgs Create(
         Location18_TicTacToe ticTacToe,
         DialoguePatchType patchType
     )
@@ -40,7 +39,7 @@ public sealed class DialogueTTTEventArgs : DialogueEventArgs
 
         return new(
             objectName,
-            SceneManager.GetActiveScene().name,
+            ticTacToe.gameObject.scene.name,
             novella?.indexStringDialogue ?? 0,
             novella?.textNeed ?? string.Empty,
             speaker: null,
