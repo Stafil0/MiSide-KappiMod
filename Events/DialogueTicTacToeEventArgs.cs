@@ -9,11 +9,11 @@ using BepInEx.IL2CPP;
 
 namespace KappiMod.Events;
 
-public sealed class DialogueTTTEventArgs : DialogueEventArgs
+public sealed class DialogueTicTacToeEventArgs : DialogueEventArgs
 {
     private readonly Location18_TicTacToe TicTacToe;
 
-    private DialogueTTTEventArgs(
+    private DialogueTicTacToeEventArgs(
         string objectName,
         string sceneName,
         int indexString,
@@ -27,7 +27,7 @@ public sealed class DialogueTTTEventArgs : DialogueEventArgs
         TicTacToe = ticTacToe;
     }
 
-    public static DialogueTTTEventArgs Create(
+    public static DialogueTicTacToeEventArgs Create(
         Location18_TicTacToe ticTacToe,
         DialoguePatchType patchType
     )
