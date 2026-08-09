@@ -75,8 +75,8 @@ public sealed class DialogueTamagotchiEventArgs : DialogueEventArgs
             return;
         }
 
-        // Vanilla click only advances when play == false; finish typewriter first
-        // so KeyNextDialogue matches the Update/KeyNextDialogue gate.
+        // Mirror novels Skip: finish typewriter this frame, advance on the next
+        // Update when play == false (vanilla KeyNextDialogue / click gate).
         if (Dialogue.play)
         {
             if (Dialogue.textDialogue is not null && Dialogue.stringDialogueNeed is not null)
@@ -86,6 +86,7 @@ public sealed class DialogueTamagotchiEventArgs : DialogueEventArgs
 
             Dialogue.stringDialogueNow = Dialogue.stringDialogueNeed;
             Dialogue.play = false;
+            return;
         }
 
         Dialogue.KeyNextDialogue();
