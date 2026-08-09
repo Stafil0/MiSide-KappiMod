@@ -168,7 +168,7 @@ public sealed class DialogueStartPatch : IPatch
         [HarmonyPatch(typeof(Tamagotchi_Dialogue), nameof(Tamagotchi_Dialogue.Update))]
         private static void OnTamagotchiUpdatePostfix(Tamagotchi_Dialogue __instance)
         {
-            if (__instance.IsNullOrDestroyed() || !__instance.enableDialogue)
+            if (__instance.IsNullOrDestroyed() || !__instance.enableDialogue || __instance.play)
             {
                 return;
             }

@@ -70,20 +70,8 @@ public sealed class DialogueTamagotchiEventArgs : DialogueEventArgs
 
     public override void Skip()
     {
-        if (Dialogue.IsNullOrDestroyed() || !Dialogue.enableDialogue)
+        if (Dialogue.IsNullOrDestroyed() || !Dialogue.enableDialogue || Dialogue.play)
         {
-            return;
-        }
-
-        if (Dialogue.play)
-        {
-            if (Dialogue.textDialogue is not null && Dialogue.stringDialogueNeed is not null)
-            {
-                Dialogue.textDialogue.text = Dialogue.stringDialogueNeed;
-            }
-
-            Dialogue.stringDialogueNow = Dialogue.stringDialogueNeed;
-            Dialogue.play = false;
             return;
         }
 
