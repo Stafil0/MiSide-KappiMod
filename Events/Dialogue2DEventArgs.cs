@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UniverseLib.Utility;
 #if ML
 using Il2Cpp;
@@ -38,7 +37,7 @@ public sealed class Dialogue2DEventArgs : DialogueEventArgs
 
         return new(
             objectName,
-            SceneManager.GetActiveScene().name,
+            novella.gameObject.scene.name,
             novella.indexStringDialogue,
             novella.textNeed ?? string.Empty,
             speaker: null,
