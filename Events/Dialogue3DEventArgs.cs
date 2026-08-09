@@ -19,7 +19,8 @@ public sealed class Dialogue3DEventArgs : DialogueEventArgs
         int indexString,
         string text,
         GameObject? speaker,
-        DialoguePatchType patchType)
+        DialoguePatchType patchType
+    )
         : base(objectName, sceneName, indexString, text, speaker, patchType)
     {
         DialogueInstance = dialogueInstance;
@@ -27,7 +28,8 @@ public sealed class Dialogue3DEventArgs : DialogueEventArgs
 
     public static Dialogue3DEventArgs Create(
         Dialogue_3DText instance,
-        DialoguePatchType patchType) =>
+        DialoguePatchType patchType
+    ) =>
         new(
             instance,
             instance.name,
@@ -35,7 +37,8 @@ public sealed class Dialogue3DEventArgs : DialogueEventArgs
             instance.indexString,
             instance.textPrint,
             instance.speaker,
-            patchType);
+            patchType
+        );
 
     public override void Skip() => DialogueInstance.SkipDialogue();
 }

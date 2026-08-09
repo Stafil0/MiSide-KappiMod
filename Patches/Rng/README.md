@@ -6,10 +6,9 @@ List of mod patches here. If you found an error, or you have some suggestions, y
 
 ## Rng Patches
 
-1. [DeterministicRandomPatch](./DeterministicRandomPatch.cs) (+ [ScopedRandomPatch](./ScopedRandomPatch.cs))
+1. [DeterministicRandomPatch](./DeterministicRandomPatch.cs) + [DeterministicRandom](./DeterministicRandom.cs)
 
    Makes random rolls in the game repeatable / forceable so other patches can remove RNG.
-   `ScopedRandomPatch` is the base for patches that scope `DisabledRandom` around game methods.
 
 2. [ChibiDoorUnlockerPatch](./ChibiDoorUnlockerPatch.cs)
 

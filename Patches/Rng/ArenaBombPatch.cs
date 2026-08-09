@@ -17,11 +17,9 @@ internal sealed class ArenaBombPatch : IPatch
 {
     public string Id => "com.kappimod.arenabomb";
     public string Name => "Arena Bomb Patch";
-    public string Description =>
-        "Run & Hide bombs: fixed music/eyes timers";
+    public string Description => "Run & Hide bombs: fixed music and eye timers";
 
-    private static bool _disabledRng;
-    private static int _phase;
+    private static IRandom? _previous;
 
     private readonly HarmonyLib.Harmony _harmony;
 
@@ -33,128 +31,135 @@ internal sealed class ArenaBombPatch : IPatch
 
     public void Dispose()
     {
+        RestoreRandomSource();
         _harmony.UnpatchSelf();
     }
 
-    private static bool DisableRng()
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.PlayPhase))]
+    private static void BeforePlayPhase(int x)
     {
-        var previous = _disabledRng;
-        _disabledRng = true;
+        try
+        {
+            if (x is not (1 or 2))
+            {
+                RestoreRandomSource();
+                return;
+            }
+
+            var previous = ChangeRandomSource(x);
+            _previous ??= previous;
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException($"Failed in {nameof(ArenaBombPatch)}", exception: ex);
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.PlayPhase))]
+    private static void AfterPlayPhase(int x)
+    {
+        try
+        {
+            if (x is not (1 or 2))
+            {
+                return;
+            }
+
+            EventManager.ShowEvent(
+                new($"{nameof(BlessRng)}: Run & Hide bombs: fixed music and eye timers")
+            );
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException($"Failed in {nameof(ArenaBombPatch)}", exception: ex);
+        }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.MitaSwitchRecorder))]
+    private static void BeforeSwitchRecorder()
+    {
+        try
+        {
+            var previous = ChangeRandomSource(phase: 1);
+            _previous ??= previous;
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException($"Failed in {nameof(ArenaBombPatch)}", exception: ex);
+        }
+    }
+
+    private static IRandom ChangeRandomSource(int phase)
+    {
+        var previous = RandomPatch.GetSource();
+
+        if (previous is ArenaBombRandom bomb && bomb.Phase == phase && bomb.Enabled)
+        {
+            return previous;
+        }
+
+        try
+        {
+            var next = new ArenaBombRandom(previous, phase);
+            next.SetState(new() { Enabled = true, ForceZeroRandom = false });
+            RandomPatch.SetSource(next);
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to disable random", exception: ex);
+        }
+
         return previous;
     }
 
-    private static void RestoreRng(bool previous) => _disabledRng = previous;
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.PlayPhase))]
-    private static void BeforePlayPhase(int x, out bool __state)
+    private static void RestoreRandomSource()
     {
-        _phase = x is 1 or 2 ? x : 0;
-        __state = x is 1 or 2 ? DisableRng() : _disabledRng;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.PlayPhase))]
-    private static void AfterPlayPhase(int x, bool __state)
-    {
-        RestoreRng(__state);
-
-        if (x is not (1 or 2))
+        if (_previous is null)
         {
             return;
         }
 
-        const string MESSAGE = "Run & Hide bombs: fixed music/eyes timers";
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-        KappiLogger.Log(MESSAGE);
+        try
+        {
+            RandomPatch.SetSource(_previous);
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to restore random state", exception: ex);
+        }
+
+        _previous = null;
     }
+}
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.ResetPhase))]
-    private static void BeforeResetPhase(out bool __state) => __state = DisableRng();
+internal sealed class ArenaBombRandom : CustomRandom
+{
+    public int Phase { get; }
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.ResetPhase))]
-    private static void AfterResetPhase(bool __state) => RestoreRng(__state);
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.MitaSwitchRecorder))]
-    private static void BeforeSwitchRecorder(out bool __state)
+    public ArenaBombRandom(IRandom from, int phase)
+        : base(from)
     {
-        _phase = 1;
-        __state = DisableRng();
+        Phase = phase;
     }
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location20_Arena), nameof(Location20_Arena.MitaSwitchRecorder))]
-    private static void AfterSwitchRecorder(bool __state) => RestoreRng(__state);
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location20_Arena), "Update")]
-    private static void BeforeUpdate(out bool __state) => __state = DisableRng();
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location20_Arena), "Update")]
-    private static void AfterUpdate(bool __state) => RestoreRng(__state);
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.Range), new[] { typeof(float), typeof(float) })]
-    private static void AfterRangeFloat(float minInclusive, float maxInclusive, ref float __result)
-    {
-        if (!_disabledRng)
+    public override float RangeFloat(float minInclusive, float maxInclusive) =>
+        Phase switch
         {
-            return;
-        }
-
-        switch (_phase)
-        {
-            case 1:
-                ForcePhase1Random(minInclusive, maxInclusive, ref __result);
-                break;
-            case 2:
-                ForcePhase2Random(minInclusive, maxInclusive, ref __result);
-                break;
-        }
-    }
-
-    private static void ForcePhase1Random(float min, float max, ref float result)
-    {
-        // Music ON
-        if (Approx(min, 2f) && Approx(max, 4f))
-        {
-            result = 4f;
-            return;
-        }
-
-        // Music OFF
-        if (Approx(min, 1f) && Approx(max, 2f))
-        {
-            result = 1f;
-        }
-    }
-
-    private static void ForcePhase2Random(float min, float max, ref float result)
-    {
-        // Eyes closed (first time)
-        if (Approx(min, 3f) && Approx(max, 6f))
-        {
-            result = 4f;
-            return;
-        }
-
-        // Eyes closed (consecutive time)
-        if (Approx(min, 2f) && Approx(max, 3f))
-        {
-            result = 3f;
-            return;
-        }
-
-        // Eyes open window
-        if (Approx(min, -5f) && Approx(max, -4f))
-        {
-            result = -4f;
-        }
-    }
+            // Music ON
+            1 when Approx(minInclusive, 2f) && Approx(maxInclusive, 4f) => 4f,
+            // Music OFF
+            1 when Approx(minInclusive, 1f) && Approx(maxInclusive, 2f) => 1f,
+            // Eyes closed (first time)
+            2 when Approx(minInclusive, 3f) && Approx(maxInclusive, 6f) => 4f,
+            // Eyes closed (consecutive time)
+            2 when Approx(minInclusive, 2f) && Approx(maxInclusive, 3f) => 3f,
+            // Eyes open window
+            2 when Approx(minInclusive, -5f) && Approx(maxInclusive, -4f) => -4f,
+            _ => base.RangeFloat(minInclusive, maxInclusive),
+        };
 
     private static bool Approx(float a, float b) => Mathf.Abs(a - b) < 0.001f;
 }

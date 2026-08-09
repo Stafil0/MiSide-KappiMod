@@ -1,5 +1,6 @@
 using HarmonyLib;
 using KappiMod.Logging;
+using KappiMod.Patches.Core;
 #if ML
 using Il2Cpp;
 #elif BIE
@@ -9,16 +10,26 @@ using BepInEx.IL2CPP;
 namespace KappiMod.Patches.Rng;
 
 [HarmonyPatch]
-internal sealed class MilaMinigame1Patch : ScopedRandomPatch
+internal sealed class MilaMinigame1Patch : IPatch
 {
-    public override string Id => "com.kappimod.milaminigame1";
-    public override string Name => "Mila Minigame 1 Patch";
-    public override string Description => "Mila laser minigame: fixed shot curve";
+    public string Id => "com.kappimod.milaminigame1";
+    public string Name => "Mila Minigame 1 Patch";
+    public string Description => "Mila laser minigame: fixed shot curve";
 
     private static readonly float[] ShotCurve = { -1f, +0.5f, -0.5f, +1f, -0.5f };
 
+    private readonly HarmonyLib.Harmony _harmony;
+
+    public MilaMinigame1Patch()
+    {
+        _harmony = new(Id);
+        _harmony.PatchAll(typeof(MilaMinigame1Patch));
+    }
+
+    public void Dispose() => _harmony.UnpatchSelf();
+
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location19_Game1), "PointsRandom")]
+    [HarmonyPatch(typeof(Location19_Game1), nameof(Location19_Game1.PointsRandom))]
     private static void LockGame1ShotCurve(Location19_Game1 __instance)
     {
         try

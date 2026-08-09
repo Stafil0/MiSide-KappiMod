@@ -62,7 +62,7 @@ public static class NativeResolutionOption
                 .FindObjectsOfTypeAll(Il2CppType.Of<MenuCaseOption>())
                 ?.FirstOrDefault(x => x.name == "Button Resolution")
                 ?.Cast<MenuCaseOption>();
-            if (UnityHelpers.IsNullOrDestroyed(menuCaseOption) || menuCaseOption == null)
+            if (menuCaseOption.IsNullOrDestroyed() || menuCaseOption == null)
             {
                 KappiLogger.LogError("MenuCaseOption not found");
                 return;
@@ -99,7 +99,8 @@ public static class NativeResolutionOption
             int maxRefreshRate =
                 Screen
                     .resolutions.Where(r => r.width == nativeWidth && r.height == nativeHeight)
-                    ?.Max(r => r.refreshRate) ?? Screen.resolutions.Max(r => r.refreshRate);
+                    ?.Max(r => r.refreshRate)
+                ?? Screen.resolutions.Max(r => r.refreshRate);
 
             return new Resolution
             {

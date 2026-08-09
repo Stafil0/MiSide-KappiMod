@@ -20,7 +20,8 @@ public sealed class DialogueTTTEventArgs : DialogueEventArgs
         string text,
         GameObject? speaker,
         DialoguePatchType patchType,
-        Location18_TicTacToe ticTacToe)
+        Location18_TicTacToe ticTacToe
+    )
         : base(objectName, sceneName, indexString, text, speaker, patchType)
     {
         TicTacToe = ticTacToe;
@@ -28,12 +29,14 @@ public sealed class DialogueTTTEventArgs : DialogueEventArgs
 
     public static DialogueTTTEventArgs Create(
         Location18_TicTacToe ticTacToe,
-        DialoguePatchType patchType)
+        DialoguePatchType patchType
+    )
     {
         Location18_Novella? novella = ticTacToe.main;
-        string objectName = !UnityHelpers.IsNullOrDestroyed(novella?.dialoguePlay)
-            ? novella!.dialoguePlay.name
-            : ticTacToe.name;
+        string objectName =
+            novella?.dialoguePlay is not null && !novella.dialoguePlay.IsNullOrDestroyed()
+                ? novella.dialoguePlay.name
+                : ticTacToe.name;
 
         return new(
             objectName,
@@ -42,18 +45,18 @@ public sealed class DialogueTTTEventArgs : DialogueEventArgs
             novella?.textNeed ?? string.Empty,
             speaker: null,
             patchType,
-            ticTacToe);
+            ticTacToe
+        );
     }
 
     public override void Skip()
     {
-        if (UnityHelpers.IsNullOrDestroyed(TicTacToe))
+        if (TicTacToe.IsNullOrDestroyed())
         {
             return;
         }
 
-        if (TicTacToe.timeDialogueNext > 0f &&
-            !UnityHelpers.IsNullOrDestroyed(TicTacToe.main))
+        if (TicTacToe.timeDialogueNext > 0f && !TicTacToe.main.IsNullOrDestroyed())
         {
             TicTacToe.timeDialogueNext = 0f;
             TicTacToe.main.NextDialogue();

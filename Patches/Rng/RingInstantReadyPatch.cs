@@ -1,6 +1,5 @@
 using HarmonyLib;
 using KappiMod.Logging;
-using KappiMod.Mods;
 using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
 #if ML
@@ -17,7 +16,7 @@ internal sealed class RingInstantReadyPatch : IPatch
     public string Id => "com.kappimod.ringinstantready";
     public string Name => "Ring Instant Ready Patch";
     public string Description =>
-        "Skips the ring wait event and instantly makes the ring ready in Cappie chapter";
+        "Skips the ring wait event and makes the ring ready instantly in the Cappie chapter";
 
     private readonly HarmonyLib.Harmony _harmony;
 
@@ -40,9 +39,7 @@ internal sealed class RingInstantReadyPatch : IPatch
         {
             __instance.ReadyTime();
 
-            const string MESSAGE = "Ring wait event skipped";
-            EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-            KappiLogger.Log(MESSAGE);
+            EventManager.ShowEvent(new("Ring wait event skipped"));
         }
         catch (Exception ex)
         {

@@ -3,7 +3,6 @@ using KappiMod.Logging;
 using KappiMod.Mods;
 using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
-using UnityEngine;
 #if ML
 using Il2Cpp;
 #elif BIE
@@ -17,10 +16,7 @@ internal sealed class RunCorridorPatch : IPatch
 {
     public string Id => "com.kappimod.runcorridor";
     public string Name => "Run Corridor Patch";
-    public string Description =>
-        "Run & Hide corridor: only straights";
-
-    private static bool _disabledRng;
+    public string Description => "Run & Hide corridor: straight paths only";
 
     private readonly HarmonyLib.Harmony _harmony;
 
@@ -35,53 +31,83 @@ internal sealed class RunCorridorPatch : IPatch
         _harmony.UnpatchSelf();
     }
 
-    private static bool DisableRng()
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Location20_RunCorridor), nameof(Location20_RunCorridor.Start))]
+    private static void BeforeStart(out IRandom __state) => __state = ChangeRandomSource();
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Location20_RunCorridor), nameof(Location20_RunCorridor.Start))]
+    private static void AfterStart(IRandom __state)
     {
-        var previous = _disabledRng;
-        _disabledRng = true;
+        RestoreRandomSource(__state);
+
+        try
+        {
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Run & Hide: straight paths only"));
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to show corridor event", exception: ex);
+        }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Location20_RunCorridor), nameof(Location20_RunCorridor.CreateGeneration))]
+    private static void BeforeCreateGeneration(out IRandom __state) =>
+        __state = ChangeRandomSource();
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Location20_RunCorridor), nameof(Location20_RunCorridor.CreateGeneration))]
+    private static void AfterCreateGeneration(IRandom __state) => RestoreRandomSource(__state);
+
+    private static IRandom ChangeRandomSource()
+    {
+        var previous = RandomPatch.GetSource();
+
+        try
+        {
+            var next = new CorridorRandom(previous);
+            next.SetState(new() { Enabled = true, ForceZeroRandom = true });
+            RandomPatch.SetSource(next);
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to disable random", exception: ex);
+        }
+
         return previous;
     }
 
-    private static void RestoreRng(bool previous) => _disabledRng = previous;
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
-    private static void BeforeStart(out bool __state) => __state = DisableRng();
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "Start")]
-    private static void AfterStart(bool __state)
+    private static void RestoreRandomSource(IRandom previous)
     {
-        RestoreRng(__state);
-
-        const string MESSAGE = "Run & Hide: only straights";
-        EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-        KappiLogger.Log(MESSAGE);
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
-    private static void BeforeCreateGeneration(out bool __state) => __state = DisableRng();
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location20_RunCorridor), "CreateGeneration")]
-    private static void AfterCreateGeneration(bool __state) => RestoreRng(__state);
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(UnityEngine.Random), nameof(UnityEngine.Random.Range), new[] { typeof(int), typeof(int) })]
-    private static void AfterRangeInt(int minInclusive, int maxExclusive, ref int __result)
-    {
-        if (!_disabledRng || maxExclusive <= minInclusive)
+        try
         {
-            return;
+            RandomPatch.SetSource(previous);
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to restore random state", exception: ex);
+        }
+    }
+}
+
+internal sealed class CorridorRandom : CustomRandom
+{
+    public CorridorRandom(IRandom from)
+        : base(from) { }
+
+    public override int RangeInt(int minInclusive, int maxExclusive)
+    {
+        if (maxExclusive <= minInclusive)
+        {
+            return base.RangeInt(minInclusive, maxExclusive);
         }
 
         if (minInclusive == 0 && maxExclusive == 2)
         {
-            __result = 0;
-            return;
+            return 0;
         }
 
-        __result = maxExclusive - 1;
+        return maxExclusive - 1;
     }
 }

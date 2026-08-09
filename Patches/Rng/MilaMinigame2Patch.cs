@@ -1,6 +1,7 @@
 using HarmonyLib;
 using KappiMod.Logging;
 using KappiMod.Mods;
+using KappiMod.Patches.Core;
 using KappiMod.UI.Internal.EventDisplay;
 using UnityEngine;
 #if ML
@@ -12,11 +13,11 @@ using BepInEx.IL2CPP;
 namespace KappiMod.Patches.Rng;
 
 [HarmonyPatch]
-internal sealed class MilaMinigame2Patch : ScopedRandomPatch
+internal sealed class MilaMinigame2Patch : IPatch
 {
-    public override string Id => "com.kappimod.milaminigame2";
-    public override string Name => "Mila Minigame 2 Patch";
-    public override string Description => "Mila towers minigame: zigzag pattern";
+    public string Id => "com.kappimod.milaminigame2";
+    public string Name => "Mila Minigame 2 Patch";
+    public string Description => "Mila towers mini-game: zigzag pattern";
 
     private const float MinCatchRadius = 0.25f;
     private const float MinStepMult = 0.7f;
@@ -25,22 +26,43 @@ internal sealed class MilaMinigame2Patch : ScopedRandomPatch
     private const float LastTowerDirZ = 0.225f;
     private const float VisualScaleFactor = 0.2f;
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Location19_Game2), "Start")]
-    private static void BeforeGame2Start(out bool __state) => __state = DisableRandom();
+    private readonly HarmonyLib.Harmony _harmony;
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Location19_Game2), "Start")]
-    private static void AfterGame2Start(Location19_Game2 __instance, bool __state)
+    public MilaMinigame2Patch()
     {
-        RestoreRandom(__state);
+        _harmony = new(Id);
+        _harmony.PatchAll(typeof(MilaMinigame2Patch));
+    }
 
+    public void Dispose() => _harmony.UnpatchSelf();
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Location19_Game2), nameof(Location19_Game2.Start))]
+    private static void BeforeGame2Start(out RandomState __state)
+    {
+        __state = new();
         try
         {
+            __state = RandomPatch.GetState();
+            RandomPatch.SetState(new() { Enabled = true, ForceZeroRandom = true });
+        }
+        catch (Exception ex)
+        {
+            KappiLogger.LogException("Failed to disable random", exception: ex);
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Location19_Game2), nameof(Location19_Game2.Start))]
+    private static void AfterGame2Start(Location19_Game2 __instance, RandomState __state)
+    {
+        try
+        {
+            RandomPatch.SetState(__state);
+
             ApplyGame2ZigzagLayout(__instance);
-            const string MESSAGE = "Mila Game 2: zigzag pattern";
-            EventManager.ShowEvent(new($"{nameof(BlessRng)}: {MESSAGE}"));
-            KappiLogger.Log(MESSAGE);
+
+            EventManager.ShowEvent(new($"{nameof(BlessRng)}: Mila Game 2: zigzag pattern applied"));
         }
         catch (Exception ex)
         {
@@ -98,12 +120,15 @@ internal sealed class MilaMinigame2Patch : ScopedRandomPatch
             pathLen += step;
         }
 
-        var last = points[points.Count - 1]?.point;
-        var endToEnd = last != null
-            ? Vector3.Distance(anchor.transform.position, last.transform.position)
-            : 0f;
+        var last = points[^1]?.point;
+        var endToEnd =
+            last != null
+                ? Vector3.Distance(anchor.transform.position, last.transform.position)
+                : 0f;
 
-        KappiLogger.Log($"[Game 2] zigzag {points.Count} towers, pathLen={pathLen:F3}, endToEnd={endToEnd:F3}, catchRadius={MinCatchRadius}, stepMult={MinStepMult}");
+        KappiLogger.Log(
+            $"[Game 2] zigzag {points.Count} towers, pathLen={pathLen:F3}, endToEnd={endToEnd:F3}, catchRadius={MinCatchRadius}, stepMult={MinStepMult}"
+        );
     }
 
     private static void ApplyCatchRadius(Location19_Game2_Point entry, float catchRadius)

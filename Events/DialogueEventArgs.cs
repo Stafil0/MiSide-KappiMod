@@ -23,7 +23,8 @@ public abstract class DialogueEventArgs : EventArgs
         int indexString,
         string text,
         GameObject? speaker,
-        DialoguePatchType patchType)
+        DialoguePatchType patchType
+    )
     {
         ObjectName = objectName;
         SceneName = sceneName;
