@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UniverseLib.Utility;
 #if ML
 using Il2Cpp;
@@ -59,7 +58,8 @@ public sealed class DialogueTamagotchiEventArgs : DialogueEventArgs
 
         return new(
             objectName,
-            SceneManager.GetActiveScene().name,
+            // Object scene — GetActiveScene() is wrong with additive chapter loads.
+            dialogue.gameObject.scene.name,
             indexString,
             text,
             speaker,
