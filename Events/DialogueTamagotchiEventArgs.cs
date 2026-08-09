@@ -75,8 +75,6 @@ public sealed class DialogueTamagotchiEventArgs : DialogueEventArgs
             return;
         }
 
-        // Mirror novels Skip: finish typewriter this frame, advance on the next
-        // Update when play == false (vanilla KeyNextDialogue / click gate).
         if (Dialogue.play)
         {
             if (Dialogue.textDialogue is not null && Dialogue.stringDialogueNeed is not null)
